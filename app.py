@@ -888,7 +888,7 @@ def apply_styles() -> None:
     st.markdown(
         """
         <style>
-        .stApp { background: var(--background-color); color: var(--text-color); }
+        .stApp { background: #f4f4f1; color: #171717; }
         .block-container { max-width: 1440px; padding-top: 2rem; }
         .hero {
           padding: 1.5rem 2rem 1.75rem;
@@ -907,43 +907,40 @@ def apply_styles() -> None:
         .hero h1 { margin:.25rem 0; font-size:clamp(2rem,5vw,3.4rem); line-height:1; }
         .hero p { color:#c7c7c7; margin:.6rem 0 0; }
         [data-testid="stMetric"] {
-          padding:1rem; background:var(--secondary-background-color);
-          border:1px solid var(--border-color);
+          padding:1rem; background:#ffffff; border:1px solid #deded9;
           border-radius:10px;
         }
         div[data-testid="stExpander"] {
-          background:var(--secondary-background-color);
-          border:1px solid var(--border-color); border-radius:10px;
+          background:#ffffff; border:1px solid #deded9; border-radius:10px;
           margin-bottom:.65rem;
         }
         .bracket-scroll { overflow-x:auto; padding:20px 14px 28px; }
         .bracket-canvas { position:relative; min-width:max-content; }
         .bracket-svg { position:absolute; left:0; top:0; z-index:0; overflow:visible; }
         .round-label {
-          position:absolute; top:0; width:190px; color:var(--text-color);
+          position:absolute; top:0; width:190px; color:#77776f;
           font-size:.7rem; font-weight:800; letter-spacing:.08em;
-          text-transform:uppercase; white-space:nowrap; opacity:.75;
+          text-transform:uppercase; white-space:nowrap;
         }
         .match-position { position:absolute; z-index:1; }
         .match {
-          height:100%; overflow:hidden; border:1px solid var(--border-color);
-          border-radius:8px; background:var(--secondary-background-color);
+          height:100%; overflow:hidden; border:1px solid #deded9;
+          border-radius:8px; background:#ffffff;
           box-shadow:0 2px 8px #1111110b;
         }
         .match-heading {
-          height:27px; padding:6px 9px; background:var(--background-color);
-          color:var(--text-color); font-size:.68rem; font-weight:800;
+          height:27px; padding:6px 9px; background:#f2f2ef;
+          color:#66665e; font-size:.68rem; font-weight:800;
           letter-spacing:.05em; text-transform:uppercase;
         }
         .match:has(.fighter:only-child) .match-heading { background:#fff5bf; color:#716000; }
         .fighter {
-          height:29px; padding:6px 9px; border-top:1px solid var(--border-color);
-          color:var(--text-color); font-size:.76rem; font-weight:650;
+          height:29px; padding:6px 9px; border-top:1px solid #ecece8;
+          color:#171717; font-size:.76rem; font-weight:650;
           overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
         }
         .fighter.pending {
-          color:var(--text-color); background:var(--background-color);
-          font-style:italic; opacity:.78;
+          color:#77776f; background:#f8f8f6; font-style:italic;
         }
         .round-robin { width:100%; max-width:100%; }
         .round-robin-matches {
@@ -953,11 +950,10 @@ def apply_styles() -> None:
         .round-robin-matches .match { height:88px; min-width:0; }
         .standings { width:100%; border-collapse:collapse; table-layout:fixed; }
         .standings th, .standings td {
-          padding:8px 10px; border:1px solid var(--border-color); text-align:left;
+          padding:8px 10px; border:1px solid #deded9; text-align:left;
         }
         .standings th {
-          background:var(--secondary-background-color); color:var(--text-color);
-          font-size:.78rem;
+          background:#f2f2ef; color:#171717; font-size:.78rem;
         }
         .standings td { height:34px; }
         .standings th:first-child, .standings td:first-child { width:14%; }
