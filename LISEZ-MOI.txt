@@ -1,0 +1,79 @@
+TFT SERIE NO-GI #1 - APPLICATION PUBLIQUE
+=========================================
+
+ROLE DE CE DEPOT
+----------------
+Ce depot contient uniquement l'application publique de consultation. Les visiteurs
+peuvent lire les tableaux publies, telecharger les PDF et imprimer la page.
+L'application ne permet pas d'importer un fichier d'inscriptions, de generer ou
+de modifier un tirage.
+
+Le code de ce depot est public et peut etre consulte ou copie. La version publique
+ne contient pas les fonctions d'administration. Il n'y a pas de commande ou de
+mot de passe admin a utiliser dans ce depot.
+
+ADMINISTRATION ET DONNEES PRIVEES
+---------------------------------
+Seul l'organisateur gere le fichier Excel, prepare les tableaux et publie un
+nouveau tirage depuis sa copie locale privee de l'outil d'administration. Cette
+copie, son code d'administration et les fichiers d'inscriptions ne doivent pas
+etre ajoutes a ce depot public.
+
+Seul le compte GitHub de l'organisateur doit avoir les droits d'ecriture sur le
+depot. Les visiteurs peuvent voir ou copier le code, mais ne peuvent pas modifier
+le site sans acces d'ecriture au depot.
+
+Les inscriptions, les classeurs Excel et les identifiants ne doivent jamais etre
+commites ici. Le fichier tournament_public.json est, lui, visible publiquement:
+il contient les noms affiches, les categories et les tableaux. Ne publier que les
+informations que l'organisateur est autorise a rendre publiques.
+
+METTRE A JOUR LE TIRAGE
+-----------------------
+1. L'organisateur prepare le tirage avec sa copie locale privee.
+2. Il remplace le fichier tournament_public.json de ce depot par le fichier de
+   publication genere par son outil local. Ne pas copier le classeur Excel.
+3. Depuis Git Bash, dans le dossier de ce depot, verifier le changement puis
+   envoyer uniquement la mise a jour du tirage:
+
+       git status
+       git add tournament_public.json
+       git commit -m "Mise a jour du tirage public"
+       git push
+
+Streamlit Community Cloud redemarre l'application apres le push sur la branche
+configuree (generalement main). Les visiteurs voient le nouveau tirage apres le
+redemarrage.
+
+DEPLOIEMENT STREAMLIT
+---------------------
+L'application est lancee depuis app.py, avec requirements.txt. Elle est en mode
+consultation uniquement; ne pas ajouter de variable d'environnement ou de
+fonctionnalite admin a l'application publique.
+
+En local, installer les dependances puis lancer la vue publique:
+
+    py -m pip install -r requirements.txt
+    py -m streamlit run app.py
+
+Cette commande ne donne aucun acces d'administration.
+
+REGLES DE COMPETITION
+---------------------
+- 1 combattant : affiche le seul inscrit, sans faux tableau.
+- 2 combattants : finale directe.
+- 3 combattants : poule Round Robin, chacun rencontre les deux autres une fois.
+  Le classement et les statistiques sont a completer manuellement; aucun rang
+  n'est pre-rempli dans la page ou le PDF.
+- 4 combattants ou plus : arbre a elimination directe, avec qualifications
+  d'office si necessaire et petite finale pour le bronze.
+- Les combats et leurs liaisons sont consultables dans la page et dans les PDF.
+
+CONFIDENTIALITE
+---------------
+Une application Streamlit publique rend son contenu visible a tous les visiteurs.
+Le depot public rend egalement le code et l'historique Git consultables. Avant
+chaque publication, verifier tournament_public.json et ne pas y inclure de
+donnees confidentielles ou d'informations personnelles non autorisees. Remplacer
+ou effacer un fichier dans la version actuelle ne le retire pas automatiquement
+des anciens commits Git.
