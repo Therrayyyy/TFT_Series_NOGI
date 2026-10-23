@@ -889,6 +889,7 @@ def apply_styles() -> None:
         """
         <style>
         .stApp { background: #f4f4f1; color: #171717; }
+        [data-testid="stToolbar"], #MainMenu, footer { display:none !important; }
         .block-container { max-width: 1440px; padding-top: 2rem; }
         .hero {
           padding: 1.5rem 2rem 1.75rem;
