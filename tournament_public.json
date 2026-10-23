@@ -203,8 +203,8 @@
           {
             "index": 0,
             "first": {
-              "last_name": "Picard",
-              "first_name": "Adrien",
+              "last_name": "Robert",
+              "first_name": "Alexandre",
               "sex": "Homme",
               "age_band": "M2",
               "weight": "-65",
@@ -216,8 +216,8 @@
           {
             "index": 1,
             "first": {
-              "last_name": "Petit",
-              "first_name": "Farid",
+              "last_name": "Caron",
+              "first_name": "Guillaume",
               "sex": "Homme",
               "age_band": "M2",
               "weight": "-65",
@@ -229,8 +229,8 @@
           {
             "index": 2,
             "first": {
-              "last_name": "Garnier",
-              "first_name": "Benoît",
+              "last_name": "Poncet",
+              "first_name": "Thomas",
               "sex": "Homme",
               "age_band": "M2",
               "weight": "-65",
@@ -255,8 +255,8 @@
           {
             "index": 4,
             "first": {
-              "last_name": "Caron",
-              "first_name": "Guillaume",
+              "last_name": "Masson",
+              "first_name": "Kévin",
               "sex": "Homme",
               "age_band": "M2",
               "weight": "-65",
@@ -268,48 +268,8 @@
           {
             "index": 5,
             "first": {
-              "last_name": "Carpentier",
-              "first_name": "Mathieu",
-              "sex": "Homme",
-              "age_band": "M2",
-              "weight": "-65",
-              "level": "Unique"
-            },
-            "second": {
-              "last_name": "Masson",
-              "first_name": "Kévin",
-              "sex": "Homme",
-              "age_band": "M2",
-              "weight": "-65",
-              "level": "Unique"
-            },
-            "is_bye": false
-          },
-          {
-            "index": 6,
-            "first": {
-              "last_name": "Blanchard",
-              "first_name": "Jérémy",
-              "sex": "Homme",
-              "age_band": "M2",
-              "weight": "-65",
-              "level": "Unique"
-            },
-            "second": {
-              "last_name": "Robert",
-              "first_name": "Alexandre",
-              "sex": "Homme",
-              "age_band": "M2",
-              "weight": "-65",
-              "level": "Unique"
-            },
-            "is_bye": false
-          },
-          {
-            "index": 7,
-            "first": {
-              "last_name": "Poncet",
-              "first_name": "Thomas",
+              "last_name": "Picard",
+              "first_name": "Adrien",
               "sex": "Homme",
               "age_band": "M2",
               "weight": "-65",
@@ -324,22 +284,62 @@
               "level": "Unique"
             },
             "is_bye": false
-          }
-        ],
-        [
+          },
           {
-            "index": 0,
+            "index": 6,
             "first": {
-              "last_name": "Picard",
-              "first_name": "Adrien",
+              "last_name": "Petit",
+              "first_name": "Farid",
               "sex": "Homme",
               "age_band": "M2",
               "weight": "-65",
               "level": "Unique"
             },
             "second": {
-              "last_name": "Petit",
-              "first_name": "Farid",
+              "last_name": "Blanchard",
+              "first_name": "Jérémy",
+              "sex": "Homme",
+              "age_band": "M2",
+              "weight": "-65",
+              "level": "Unique"
+            },
+            "is_bye": false
+          },
+          {
+            "index": 7,
+            "first": {
+              "last_name": "Garnier",
+              "first_name": "Benoît",
+              "sex": "Homme",
+              "age_band": "M2",
+              "weight": "-65",
+              "level": "Unique"
+            },
+            "second": {
+              "last_name": "Carpentier",
+              "first_name": "Mathieu",
+              "sex": "Homme",
+              "age_band": "M2",
+              "weight": "-65",
+              "level": "Unique"
+            },
+            "is_bye": false
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "Robert",
+              "first_name": "Alexandre",
+              "sex": "Homme",
+              "age_band": "M2",
+              "weight": "-65",
+              "level": "Unique"
+            },
+            "second": {
+              "last_name": "Caron",
+              "first_name": "Guillaume",
               "sex": "Homme",
               "age_band": "M2",
               "weight": "-65",
@@ -350,8 +350,8 @@
           {
             "index": 1,
             "first": {
-              "last_name": "Garnier",
-              "first_name": "Benoît",
+              "last_name": "Poncet",
+              "first_name": "Thomas",
               "sex": "Homme",
               "age_band": "M2",
               "weight": "-65",
@@ -370,8 +370,8 @@
           {
             "index": 2,
             "first": {
-              "last_name": "Caron",
-              "first_name": "Guillaume",
+              "last_name": "Masson",
+              "first_name": "Kévin",
               "sex": "Homme",
               "age_band": "M2",
               "weight": "-65",
@@ -697,16 +697,16 @@
           {
             "index": 0,
             "first": {
-              "last_name": "Perrin",
-              "first_name": "Hugo",
+              "last_name": "Guerin",
+              "first_name": "Clément",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "-85",
               "level": "Intermédiaire (+1,5 ans & -4 ans)"
             },
             "second": {
-              "last_name": "Guerin",
-              "first_name": "Clément",
+              "last_name": "Dupont",
+              "first_name": "Florian",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "-85",
@@ -717,8 +717,8 @@
           {
             "index": 1,
             "first": {
-              "last_name": "Dupont",
-              "first_name": "Florian",
+              "last_name": "Perrin",
+              "first_name": "Hugo",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "-85",
@@ -791,8 +791,8 @@
           {
             "index": 0,
             "first": {
-              "last_name": "Thomas",
-              "first_name": "Alex",
+              "last_name": "Poncet",
+              "first_name": "Benoît",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "+85",
@@ -811,16 +811,16 @@
           {
             "index": 1,
             "first": {
-              "last_name": "Poncet",
-              "first_name": "Benoît",
+              "last_name": "Blanchard",
+              "first_name": "Cédric",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "+85",
               "level": "Débutant (-1,5 ans)"
             },
             "second": {
-              "last_name": "Blanchard",
-              "first_name": "Cédric",
+              "last_name": "Thomas",
+              "first_name": "Alex",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "+85",
@@ -901,8 +901,8 @@
           {
             "index": 0,
             "first": {
-              "last_name": "Moreau",
-              "first_name": "Nicolas",
+              "last_name": "Bernard",
+              "first_name": "David",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "+85",
@@ -914,8 +914,8 @@
           {
             "index": 1,
             "first": {
-              "last_name": "Dumont",
-              "first_name": "Damien",
+              "last_name": "Roux",
+              "first_name": "Farid",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "+85",
@@ -927,8 +927,8 @@
           {
             "index": 2,
             "first": {
-              "last_name": "Roux",
-              "first_name": "Farid",
+              "last_name": "Moreau",
+              "first_name": "Nicolas",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "+85",
@@ -947,16 +947,16 @@
           {
             "index": 3,
             "first": {
-              "last_name": "Poncet",
-              "first_name": "Yannick",
+              "last_name": "Dumont",
+              "first_name": "Damien",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "+85",
               "level": "Intermédiaire (+1,5 ans & -4 ans)"
             },
             "second": {
-              "last_name": "Bernard",
-              "first_name": "David",
+              "last_name": "Poncet",
+              "first_name": "Yannick",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "+85",
@@ -969,16 +969,16 @@
           {
             "index": 0,
             "first": {
-              "last_name": "Moreau",
-              "first_name": "Nicolas",
+              "last_name": "Bernard",
+              "first_name": "David",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "+85",
               "level": "Intermédiaire (+1,5 ans & -4 ans)"
             },
             "second": {
-              "last_name": "Dumont",
-              "first_name": "Damien",
+              "last_name": "Roux",
+              "first_name": "Farid",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "+85",
@@ -1057,8 +1057,8 @@
           {
             "index": 0,
             "first": {
-              "last_name": "Girard",
-              "first_name": "Sarah",
+              "last_name": "Perrin",
+              "first_name": "Camille",
               "sex": "Femme",
               "age_band": "F",
               "weight": "-60",
@@ -1069,6 +1069,19 @@
           },
           {
             "index": 1,
+            "first": {
+              "last_name": "Picard",
+              "first_name": "Pauline",
+              "sex": "Femme",
+              "age_band": "F",
+              "weight": "-60",
+              "level": "Unique"
+            },
+            "second": null,
+            "is_bye": true
+          },
+          {
+            "index": 2,
             "first": {
               "last_name": "Millet",
               "first_name": "Marion",
@@ -1081,31 +1094,18 @@
             "is_bye": true
           },
           {
-            "index": 2,
-            "first": {
-              "last_name": "Girard",
-              "first_name": "Julie",
-              "sex": "Femme",
-              "age_band": "F",
-              "weight": "-60",
-              "level": "Unique"
-            },
-            "second": null,
-            "is_bye": true
-          },
-          {
             "index": 3,
             "first": {
-              "last_name": "Picard",
-              "first_name": "Pauline",
+              "last_name": "Girard",
+              "first_name": "Sarah",
               "sex": "Femme",
               "age_band": "F",
               "weight": "-60",
               "level": "Unique"
             },
             "second": {
-              "last_name": "Perrin",
-              "first_name": "Camille",
+              "last_name": "Girard",
+              "first_name": "Julie",
               "sex": "Femme",
               "age_band": "F",
               "weight": "-60",
@@ -1118,16 +1118,16 @@
           {
             "index": 0,
             "first": {
-              "last_name": "Girard",
-              "first_name": "Sarah",
+              "last_name": "Perrin",
+              "first_name": "Camille",
               "sex": "Femme",
               "age_band": "F",
               "weight": "-60",
               "level": "Unique"
             },
             "second": {
-              "last_name": "Millet",
-              "first_name": "Marion",
+              "last_name": "Picard",
+              "first_name": "Pauline",
               "sex": "Femme",
               "age_band": "F",
               "weight": "-60",
@@ -1138,8 +1138,8 @@
           {
             "index": 1,
             "first": {
-              "last_name": "Girard",
-              "first_name": "Julie",
+              "last_name": "Millet",
+              "first_name": "Marion",
               "sex": "Femme",
               "age_band": "F",
               "weight": "-60",
@@ -1205,16 +1205,16 @@
           {
             "index": 0,
             "first": {
-              "last_name": "Girard",
-              "first_name": "Pauline",
+              "last_name": "Millet",
+              "first_name": "Manon",
               "sex": "Femme",
               "age_band": "F",
               "weight": "+60",
               "level": "Unique"
             },
             "second": {
-              "last_name": "Simon",
-              "first_name": "Élodie",
+              "last_name": "Girard",
+              "first_name": "Pauline",
               "sex": "Femme",
               "age_band": "F",
               "weight": "+60",
@@ -1225,16 +1225,16 @@
           {
             "index": 1,
             "first": {
-              "last_name": "Millet",
-              "first_name": "Manon",
+              "last_name": "Robert",
+              "first_name": "Julie",
               "sex": "Femme",
               "age_band": "F",
               "weight": "+60",
               "level": "Unique"
             },
             "second": {
-              "last_name": "Robert",
-              "first_name": "Julie",
+              "last_name": "Simon",
+              "first_name": "Élodie",
               "sex": "Femme",
               "age_band": "F",
               "weight": "+60",
