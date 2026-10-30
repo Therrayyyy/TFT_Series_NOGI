@@ -14,6 +14,7 @@ import streamlit as st
 
 APP_DIR = Path(__file__).resolve().parent
 LOGO_PATH = APP_DIR / "logo_club.png"
+PLANNING_PATH = APP_DIR / "planning_29nov.jpg"
 PUBLIC_TOURNAMENT_PATH = APP_DIR / "tournament_public.json"
 
 CATEGORY_LABELS = {
@@ -1052,11 +1053,18 @@ def main() -> None:
           <div class="hero-brand">{logo_html}<span>TFT Série No-GI #1</span></div>
           <div class="hero-kicker">Première édition · 29 novembre 2026 · Toulouse</div>
           <h1>Tableaux de compétition</h1>
-          <p>Consultez et imprimez les tableaux publiés.</p>
+          <p>Les tableaux seront publiés le samedi 28 novembre 2026.</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
+    if PLANNING_PATH.exists():
+        st.image(
+            PLANNING_PATH,
+            caption="Planning de la journée",
+            alt="Planning de la journée du tournoi TFT Série No-GI.",
+            width="stretch",
+        )
 
     try:
         fighters, public_brackets = load_public_tournament()
