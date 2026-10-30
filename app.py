@@ -1051,20 +1051,13 @@ def main() -> None:
         f"""
         <div class="hero">
           <div class="hero-brand">{logo_html}<span>TFT Série No-GI #1</span></div>
-          <div class="hero-kicker">Première édition · 29 novembre 2026 · Toulouse</div>
+          <div class="hero-kicker">Première édition · 28 novembre 2026 · Toulouse</div>
           <h1>Tableaux de compétition</h1>
-          <p>Les tableaux seront publiés le samedi 28 novembre 2026.</p>
+          <p>Consultez les tableaux de compétition et le planning de l’événement.</p>
         </div>
         """,
         unsafe_allow_html=True,
     )
-    if PLANNING_PATH.exists():
-        st.image(
-            PLANNING_PATH,
-            caption="Planning de la journée",
-            alt="Planning de la journée du tournoi TFT Série No-GI.",
-            width="stretch",
-        )
 
     try:
         fighters, public_brackets = load_public_tournament()
@@ -1072,7 +1065,17 @@ def main() -> None:
         st.error(error)
         return
     if not fighters:
-        st.info("Les tableaux seront affichés ici dès qu’un tirage aura été publié.")
+        st.info(
+            "Les tableaux seront publiés le vendredi 27 novembre 2026. "
+            "Ils seront affichés ici dès qu’un tirage aura été publié."
+        )
+        if PLANNING_PATH.exists():
+            st.image(
+                PLANNING_PATH,
+                caption="Planning de l’événement",
+                alt="Planning de l’événement TFT Série No-GI du 28 novembre 2026.",
+                width="stretch",
+            )
         return
 
     grouped = group_fighters(fighters)
