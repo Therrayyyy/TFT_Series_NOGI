@@ -14,7 +14,7 @@ import streamlit as st
 
 APP_DIR = Path(__file__).resolve().parent
 LOGO_PATH = APP_DIR / "logo_club.png"
-PLANNING_PATH = APP_DIR / "planning_29nov.jpg"
+PLANNING_PATH = APP_DIR / "planning_29nov.png"
 PUBLIC_TOURNAMENT_PATH = APP_DIR / "tournament_public.json"
 
 CATEGORY_LABELS = {
