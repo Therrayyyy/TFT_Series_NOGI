@@ -1,4 +1,359 @@
 {
   "version": 1,
-  "categories": []
+  "categories": [
+    {
+      "category": [
+        "Homme",
+        "M2",
+        "+65",
+        "unique"
+      ],
+      "fighters": [
+        {
+          "last_name": "JEAN",
+          "first_name": "Hugo",
+          "sex": "Homme",
+          "age_band": "M2",
+          "weight": "+65",
+          "level": "Unique"
+        }
+      ],
+      "rounds": [
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "JEAN",
+              "first_name": "Hugo",
+              "sex": "Homme",
+              "age_band": "M2",
+              "weight": "+65",
+              "level": "Unique"
+            },
+            "second": null,
+            "is_bye": false
+          }
+        ]
+      ]
+    },
+    {
+      "category": [
+        "Homme",
+        "M3",
+        "-68",
+        "debutant ( -1,5 ans)"
+      ],
+      "fighters": [
+        {
+          "last_name": "Arthur",
+          "first_name": "Robles",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-68",
+          "level": "Débutant ( -1,5 ans)"
+        },
+        {
+          "last_name": "ZERARGA",
+          "first_name": "Macéo",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-68",
+          "level": "Débutant ( -1,5 ans)"
+        },
+        {
+          "last_name": "Corbel",
+          "first_name": "Axel",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-68",
+          "level": "Débutant ( -1,5 ans)"
+        },
+        {
+          "last_name": "Dam",
+          "first_name": "Daven",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-68",
+          "level": "Débutant ( -1,5 ans)"
+        }
+      ],
+      "rounds": [
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "ZERARGA",
+              "first_name": "Macéo",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-68",
+              "level": "Débutant ( -1,5 ans)"
+            },
+            "second": {
+              "last_name": "Dam",
+              "first_name": "Daven",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-68",
+              "level": "Débutant ( -1,5 ans)"
+            },
+            "is_bye": false
+          },
+          {
+            "index": 1,
+            "first": {
+              "last_name": "Arthur",
+              "first_name": "Robles",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-68",
+              "level": "Débutant ( -1,5 ans)"
+            },
+            "second": {
+              "last_name": "Corbel",
+              "first_name": "Axel",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-68",
+              "level": "Débutant ( -1,5 ans)"
+            },
+            "is_bye": false
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "first": null,
+            "second": null,
+            "is_bye": false
+          }
+        ]
+      ]
+    },
+    {
+      "category": [
+        "Homme",
+        "M3",
+        "-68",
+        "intermediaire ( +1,5 ans & -4 ans)"
+      ],
+      "fighters": [
+        {
+          "last_name": "Barnier",
+          "first_name": "Gaspard",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-68",
+          "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+        }
+      ],
+      "rounds": [
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "Barnier",
+              "first_name": "Gaspard",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-68",
+              "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+            },
+            "second": null,
+            "is_bye": false
+          }
+        ]
+      ]
+    },
+    {
+      "category": [
+        "Homme",
+        "M3",
+        "-75",
+        "debutant ( -1,5 ans)"
+      ],
+      "fighters": [
+        {
+          "last_name": "Andalo",
+          "first_name": "Colin",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-75",
+          "level": "Débutant ( -1,5 ans)"
+        },
+        {
+          "last_name": "Lamy",
+          "first_name": "Magnus",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-75",
+          "level": "Débutant ( -1,5 ans)"
+        },
+        {
+          "last_name": "Le Goff",
+          "first_name": "Lucas",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-75",
+          "level": "Débutant ( -1,5 ans)"
+        }
+      ],
+      "rounds": []
+    },
+    {
+      "category": [
+        "Homme",
+        "M3",
+        "-75",
+        "intermediaire ( +1,5 ans & -4 ans)"
+      ],
+      "fighters": [
+        {
+          "last_name": "Verrecchia",
+          "first_name": "Anthony",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-75",
+          "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+        }
+      ],
+      "rounds": [
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "Verrecchia",
+              "first_name": "Anthony",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-75",
+              "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+            },
+            "second": null,
+            "is_bye": false
+          }
+        ]
+      ]
+    },
+    {
+      "category": [
+        "Homme",
+        "M3",
+        "+85",
+        "intermediaire ( +1,5 ans & -4 ans)"
+      ],
+      "fighters": [
+        {
+          "last_name": "Trech",
+          "first_name": "Allan",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "+85",
+          "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+        },
+        {
+          "last_name": "Panepinto",
+          "first_name": "Paul",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "+85",
+          "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+        }
+      ],
+      "rounds": [
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "Trech",
+              "first_name": "Allan",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "+85",
+              "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+            },
+            "second": {
+              "last_name": "Panepinto",
+              "first_name": "Paul",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "+85",
+              "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+            },
+            "is_bye": false
+          }
+        ]
+      ]
+    },
+    {
+      "category": [
+        "Femme",
+        "F",
+        "-60",
+        "unique"
+      ],
+      "fighters": [
+        {
+          "last_name": "DAVEZAC - - MEVIZOU",
+          "first_name": "Noemie",
+          "sex": "Femme",
+          "age_band": "F",
+          "weight": "-60",
+          "level": "Unique"
+        }
+      ],
+      "rounds": [
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "DAVEZAC - - MEVIZOU",
+              "first_name": "Noemie",
+              "sex": "Femme",
+              "age_band": "F",
+              "weight": "-60",
+              "level": "Unique"
+            },
+            "second": null,
+            "is_bye": false
+          }
+        ]
+      ]
+    },
+    {
+      "category": [
+        "Femme",
+        "F",
+        "+60",
+        "unique"
+      ],
+      "fighters": [
+        {
+          "last_name": "Le Goff",
+          "first_name": "Léa",
+          "sex": "Femme",
+          "age_band": "F",
+          "weight": "+60",
+          "level": "Unique"
+        }
+      ],
+      "rounds": [
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "Le Goff",
+              "first_name": "Léa",
+              "sex": "Femme",
+              "age_band": "F",
+              "weight": "+60",
+              "level": "Unique"
+            },
+            "second": null,
+            "is_bye": false
+          }
+        ]
+      ]
+    }
+  ]
 }
