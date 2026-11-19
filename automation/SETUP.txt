@@ -16,19 +16,17 @@ les noms ou les liens de photo.
 
 AVANT DE CONFIGURER
 -------------------
-1. Dans le Google Form, ajouter une question obligatoire de type case à cocher :
+Le formulaire ne doit pas être modifié. Selon la règle confirmée par
+l’organisateur, le parcours de paiement recueille déjà le consentement et le
+formulaire indique que la photo facultative peut être partagée sur le site
+public. L’automatisation traite donc l’envoi d’une photo comme le signal
+d’autorisation. Aucune colonne de consentement supplémentaire n’est requise.
 
-   « J’autorise la publication de cette photo sur le site public TFT Série No-GI.
-   Pour un participant mineur, je confirme être son représentant légal et
-   autoriser cette publication. »
+Une photo est facultative. Si une photo est fournie mais que son lien Drive est
+absent, invalide, inaccessible ou associé à plusieurs inscriptions, la
+synchronisation s’arrête sans publier de changement.
 
-   Utiliser l’intitulé de colonne exact :
-   « Autorisation de publication de la photo »
-
-   Sans consentement explicite, la photo ne sera pas publiée. Une URL photo
-   invalide pour une ligne ayant accepté le consentement bloque la synchronisation.
-
-2. Dans le Google Sheets des réponses, créer un onglet `SyncConfig` :
+1. Dans le Google Sheets des réponses, créer un onglet `SyncConfig` :
 
    A1 : BRACKETS_LOCKED
    B1 : FALSE

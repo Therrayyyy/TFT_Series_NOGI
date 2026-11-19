@@ -38,7 +38,6 @@ REPORT_SHEETS = {
 }
 XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 GOOGLE_SHEET_MIME_TYPE = "application/vnd.google-apps.spreadsheet"
-PHOTO_CONSENT_HEADER = "Autorisation de publication de la photo"
 CONFIG_SHEET_NAME = "SyncConfig"
 MAX_PHOTO_COUNT = 100
 MAX_PHOTO_FILE_BYTES = 15 * 1024 * 1024
@@ -368,31 +367,26 @@ def extract_sheet_links(workbook: bytes) -> tuple[dict[int, str], dict[int, bool
         if cell.value is not None
     }
     photo_column = headers.get(normalize_header("Photo de profil"))
-    consent_column = headers.get(normalize_header(PHOTO_CONSENT_HEADER))
-    if photo_column is None or consent_column is None:
+    if photo_column is None:
         source.close()
-        raise SyncError(
-            "Add the required Photo de profil and "
-            f"{PHOTO_CONSENT_HEADER} columns before enabling publication."
-        )
+        raise SyncError("The required Photo de profil column is missing.")
 
     links: dict[int, str] = {}
     consent: dict[int, bool] = {}
     for row_number in range(2, worksheet.max_row + 1):
         photo_cell = worksheet.cell(row=row_number, column=photo_column)
-        consent_cell = worksheet.cell(row=row_number, column=consent_column)
         target = photo_cell.hyperlink.target if photo_cell.hyperlink else None
+        photo_value = (
+            str(photo_cell.value).strip()
+            if photo_cell.value is not None
+            else ""
+        )
         if not target and isinstance(photo_cell.value, str):
-            value = photo_cell.value.strip()
-            if value.startswith(("https://", "http://")):
-                target = value
+            if photo_value.startswith(("https://", "http://")):
+                target = photo_value
         if target:
             links[row_number] = target
-        consent_value = normalize(consent_cell.value)
-        consent[row_number] = (
-            consent_value in {"oui", "yes", "true", "1"}
-            or "autorise la publication de cette photo" in consent_value
-        )
+        consent[row_number] = bool(target or photo_value)
     source.close()
     return links, consent
 
@@ -431,7 +425,7 @@ def consented_photos(
             "last_name": fighter.last_name,
             "first_name": fighter.first_name,
             "drive_file_id": "",
-            "status": "Photo ignorée : autorisation absente",
+            "status": "Photo non fournie",
             "public_path": "",
         }
         manifest.append(row)

@@ -12,14 +12,12 @@ import sync_public
 
 
 class SyncPublicTests(unittest.TestCase):
-    def workbook_bytes(self, *, consent: str = "Oui", photo_url: str = "") -> bytes:
+    def workbook_bytes(self, *, photo_url: str = "") -> bytes:
         workbook = Workbook()
         registrations = workbook.active
         registrations.title = "Réponses au formulaire 1"
-        registrations.append(
-            ["Photo de profil", sync_public.PHOTO_CONSENT_HEADER]
-        )
-        registrations.append([photo_url, consent])
+        registrations.append(["Photo de profil"])
+        registrations.append([photo_url])
         config = workbook.create_sheet(sync_public.CONFIG_SHEET_NAME)
         config["A1"] = "BRACKETS_LOCKED"
         config["B1"] = "FALSE"
@@ -41,7 +39,7 @@ class SyncPublicTests(unittest.TestCase):
         )
         self.assertEqual(consent, {2: True})
 
-    def test_unauthorized_photo_is_not_downloaded(self):
+    def test_missing_optional_photo_is_not_downloaded(self):
         fighter = sync_public.Fighter(
             last_name="Nom",
             first_name="Prénom",
@@ -61,10 +59,10 @@ class SyncPublicTests(unittest.TestCase):
         )
 
         self.assertEqual(photos, {})
-        self.assertEqual(manifest[0]["status"], "Photo ignorée : autorisation absente")
+        self.assertEqual(manifest[0]["status"], "Photo non fournie")
         self.assertEqual(manifest[0]["drive_file_id"], "")
 
-    def test_authorized_photo_without_valid_drive_link_fails(self):
+    def test_submitted_photo_without_valid_drive_link_fails(self):
         fighter = sync_public.Fighter(
             last_name="Nom",
             first_name="Prénom",
@@ -83,6 +81,16 @@ class SyncPublicTests(unittest.TestCase):
                 links={},
                 consent={2: True},
             )
+
+    def test_photo_submission_is_the_consent_signal_without_extra_column(self):
+        workbook = self.workbook_bytes(
+            photo_url="https://drive.google.com/file/d/abcdefghijk/view"
+        )
+
+        links, consent = sync_public.extract_sheet_links(workbook)
+
+        self.assertIn(2, links)
+        self.assertTrue(consent[2])
 
     def test_bracket_lock_setting_is_read_from_syncconfig_sheet(self):
         workbook = self.workbook_bytes()
@@ -157,14 +165,35 @@ class SyncPublicTests(unittest.TestCase):
                 "Catégorie de poids - Féminines",
                 "Niveau - Masculins +17 ans",
                 "Photo de profil",
-                sync_public.PHOTO_CONSENT_HEADER,
             ]
         )
         registrations_sheet.append(
-            ["M2", "Participant", "Homme", "15/16 ans", "", "-65", "", "", "", "", "Oui"]
+            [
+                "M2",
+                "Participant",
+                "Homme",
+                "15/16 ans",
+                "",
+                "-65",
+                "",
+                "",
+                "",
+                "https://drive.google.com/file/d/abcdefghijk/view",
+            ]
         )
         registrations_sheet.append(
-            ["M1", "Participant", "Homme", "13/14 ans", "-60", "", "", "", "", "", "Oui"]
+            [
+                "M1",
+                "Participant",
+                "Homme",
+                "13/14 ans",
+                "-60",
+                "",
+                "",
+                "",
+                "",
+                "https://drive.google.com/file/d/lmnopqrstuv/view",
+            ]
         )
         config = workbook.create_sheet(sync_public.CONFIG_SHEET_NAME)
         config["A1"] = "BRACKETS_LOCKED"
@@ -204,7 +233,17 @@ class SyncPublicTests(unittest.TestCase):
                         source.getvalue(),
                     ),
                 ),
-                patch.object(sync_public, "extract_sheet_links", return_value=({}, {2: True, 3: True})),
+                patch.object(
+                    sync_public,
+                    "extract_sheet_links",
+                    return_value=(
+                        {
+                            2: "https://drive.google.com/file/d/abcdefghijk/view",
+                            3: "https://drive.google.com/file/d/lmnopqrstuv/view",
+                        },
+                        {2: True, 3: True},
+                    ),
+                ),
                 patch.object(sync_public, "consented_photos", side_effect=fake_consented_photos),
                 patch.object(sync_public, "write_private_json"),
             ):

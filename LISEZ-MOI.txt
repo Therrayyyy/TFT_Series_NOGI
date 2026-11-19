@@ -32,6 +32,10 @@ tournament_public.json et les photos de fighter_photos sont visibles
 publiquement. Ne publier que les informations et images que l'organisateur est
 autorise a rendre publiques, en particulier pour les mineurs.
 
+Le formulaire existant n'a pas a etre modifie. Selon le parcours confirme par
+l'organisateur, le paiement recueille le consentement et l'envoi d'une photo
+facultative constitue le signal d'autorisation de publication sur le site.
+
 MISE A JOUR ET SUIVI
 --------------------
 Apres configuration, chaque nouvelle reponse au formulaire declenche le
