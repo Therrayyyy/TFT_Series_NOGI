@@ -69,4 +69,6 @@ jobs:
           git push origin HEAD:main
 
       - name: Record successful publication
+        env:
+          SYNC_MANIFEST_SPREADSHEET_ID: ${{ vars.SYNC_MANIFEST_SPREADSHEET_ID }}
         run: python automation/sync_public.py --mark-success
