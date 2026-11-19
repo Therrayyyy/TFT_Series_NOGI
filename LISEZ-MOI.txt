@@ -14,40 +14,38 @@ mot de passe admin a utiliser dans ce depot.
 
 ADMINISTRATION ET DONNEES PRIVEES
 ---------------------------------
-Seul l'organisateur gere le fichier Excel, prepare les tableaux et publie un
-nouveau tirage depuis sa copie locale privee de l'outil d'administration. Cette
-copie, son code d'administration et les fichiers d'inscriptions ne doivent pas
-etre ajoutes a ce depot public.
+L'administration est prevue pour fonctionner automatiquement : apres une
+configuration unique, une nouvelle reponse Google Form declenche GitHub Actions,
+qui synchronise les inscriptions et publie le JSON et les photos autorisees sur
+la branche main. Le guide de configuration est
+automation/SETUP.txt. Tant que les secrets/variables GitHub et le declencheur
+Apps Script ne sont pas configures, aucune synchronisation automatique n'est
+active.
 
 Seul le compte GitHub de l'organisateur doit avoir les droits d'ecriture sur le
 depot. Les visiteurs peuvent voir ou copier le code, mais ne peuvent pas modifier
 le site sans acces d'ecriture au depot.
 
-Les inscriptions, les classeurs Excel et les identifiants ne doivent jamais etre
-commites ici. Le fichier tournament_public.json est, lui, visible publiquement:
-il contient les noms affiches, les categories et les tableaux. Ne publier que les
-informations que l'organisateur est autorise a rendre publiques.
+Les inscriptions, les classeurs Excel, les manifestes de tracabilite, les cles
+Google et les tokens ne doivent jamais etre commites ici. Le fichier
+tournament_public.json et les photos de fighter_photos sont visibles
+publiquement. Ne publier que les informations et images que l'organisateur est
+autorise a rendre publiques, en particulier pour les mineurs.
 
-METTRE A JOUR LE TIRAGE
------------------------
-1. L'organisateur prepare le tirage avec sa copie locale privee.
-2. S'il a genere un pack ZIP avec des photos, supprimer l'ancien dossier
-   fighter_photos s'il existe, puis decompresser le pack dans ce depot. Sinon,
-   remplacer uniquement tournament_public.json et supprimer fighter_photos
-   s'il n'est plus utilise. Ne pas copier le classeur Excel ni l'archive
-   originale des photos.
-3. Depuis Git Bash, dans le dossier de ce depot, verifier le changement puis
-   envoyer le JSON et, le cas echeant, les photos publiees:
+MISE A JOUR ET SUIVI
+--------------------
+Apres configuration, chaque nouvelle reponse au formulaire declenche le
+workflow `Sync public tournament`. Un controle quotidien sert aussi a reperer
+les changements directs apportes au classeur. Les exécutions, leur date, les
+erreurs et un resume des donnees publiees sont consultables dans GitHub > Actions.
+Le statut detaille et la tracabilite des photos sont conserves dans le Google
+Sheets prive configure, pas dans ce depot.
 
-       git status
-       git add tournament_public.json
-       git add fighter_photos  # seulement si le dossier existe
-       git commit -m "Mise a jour du tirage public"
-       git push
-
-Streamlit Community Cloud redemarre l'application apres le push sur la branche
-configuree (generalement main). Les visiteurs voient le nouveau tirage apres le
-redemarrage.
+Le workflow preserve les tableaux lorsque la liste de la categorie n'a pas
+change. La feuille SyncConfig!B1 permet de verrouiller les tableaux : lorsque la
+valeur est TRUE, un changement de roster bloque la publication. Le workflow ne
+fait jamais de force-push et ne pousse que tournament_public.json et
+fighter_photos.
 
 DEPLOIEMENT STREAMLIT
 ---------------------

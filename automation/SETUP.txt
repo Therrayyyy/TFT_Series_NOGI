@@ -1,0 +1,102 @@
+AUTOMATISATION DES INSCRIPTIONS TFT
+==================================
+
+FONCTIONNEMENT
+--------------
+Une nouvelle réponse au Google Form déclenche GitHub Actions. Le workflow lit le
+Google Sheets et les photos Drive, valide les inscriptions et les autorisations,
+génère le JSON public et les photos consenties, puis publie seulement ces fichiers
+sur la branche main. Un contrôle quotidien repère aussi les modifications ou
+suppression faites directement dans le classeur.
+
+Aucune page admin locale ni aucun token ne sont nécessaires à chaque inscription.
+Le journal de synchronisation et le manifeste de traçabilité restent dans un
+Google Sheets privé. Le workflow n’affiche que des nombres et des statuts, jamais
+les noms ou les liens de photo.
+
+AVANT DE CONFIGURER
+-------------------
+1. Dans le Google Form, ajouter une question obligatoire de type case à cocher :
+
+   « J’autorise la publication de cette photo sur le site public TFT Série No-GI.
+   Pour un participant mineur, je confirme être son représentant légal et
+   autoriser cette publication. »
+
+   Utiliser l’intitulé de colonne exact :
+   « Autorisation de publication de la photo »
+
+   Sans consentement explicite, la photo ne sera pas publiée. Une URL photo
+   invalide pour une ligne ayant accepté le consentement bloque la synchronisation.
+
+2. Dans le Google Sheets des réponses, créer un onglet `SyncConfig` :
+
+   A1 : BRACKETS_LOCKED
+   B1 : FALSE
+
+   Tant que les tableaux ne sont pas définitifs, laisser FALSE. Quand ils sont
+   verrouillés pour la compétition, passer B1 à TRUE. Toute inscription qui
+   ajouterait, retirerait ou déplacerait un participant après verrouillage bloque
+   la publication au lieu de refaire un tirage déjà publié.
+
+3. Créer un Google Sheets privé pour les rapports. Ajouter deux onglets nommés
+   exactement `PhotoManifest` et `SyncStatus`, puis laisser leurs cellules vides.
+   Ne pas partager ce classeur publiquement.
+
+GOOGLE CLOUD
+------------
+1. Dans le projet Google Cloud, activer Google Drive API.
+2. Activer aussi Google Sheets API.
+3. Créer un compte de service et télécharger sa clé JSON. Garder la clé secrète.
+4. Partager le Google Sheets de réponses en lecture avec l’adresse e-mail du compte
+   de service.
+5. Partager en lecture avec ce compte le dossier Drive où les photos envoyées par
+   le formulaire sont enregistrées.
+6. Partager le Google Sheets privé de rapports en modification avec le compte de
+   service.
+
+GITHUB
+------
+Dans les paramètres du dépôt TFT_Series_NOGI :
+
+1. Dans Actions > General, autoriser les workflows à lire et écrire le contenu du
+   dépôt.
+2. Dans Secrets and variables > Actions, créer :
+   - Secret `GOOGLE_SERVICE_ACCOUNT_JSON` : contenu du JSON du compte de service.
+   - Variable `SPREADSHEET_ID` : identifiant du Google Sheets.
+   - Variable `SYNC_MANIFEST_SPREADSHEET_ID` : identifiant du Google Sheets privé
+     de rapports.
+3. Ne jamais ajouter une clé Google, un token ou un classeur au dépôt Git.
+
+GOOGLE APPS SCRIPT
+------------------
+1. Ouvrir le Google Sheets des réponses, puis Extensions > Apps Script.
+2. Copier le contenu de `automation/apps_script/on_form_submit.gs` dans l’éditeur.
+3. Créer un fine-grained personal access token GitHub limité au seul dépôt
+   TFT_Series_NOGI avec la permission Actions: read and write. Ne pas utiliser un
+   token déjà envoyé dans un chat ; le révoquer d’abord.
+4. Dans Apps Script > Paramètres du projet > Propriétés du script, ajouter la
+   propriété `GITHUB_DISPATCH_TOKEN` et coller le nouveau token dans sa valeur.
+   Le token n’est jamais écrit dans le code.
+5. Dans l’éditeur Apps Script, sélectionner `installRegistrationTrigger`, cliquer
+   Exécuter et accepter les autorisations. Le déclencheur s’exécute sous le compte
+   Google du propriétaire du classeur.
+
+Le déclencheur envoie un événement à GitHub. GitHub Actions utilise ensuite son
+propre jeton temporaire `GITHUB_TOKEN` pour publier ; le token Apps Script ne peut
+pas modifier le contenu du dépôt.
+
+VÉRIFICATION
+------------
+1. Lancer manuellement `Sync public tournament` dans l’onglet Actions pour le
+   premier test.
+2. Vérifier le résultat dans GitHub > Actions. Les erreurs ne publient aucun
+   fichier public. Les rapports privés sont enregistrés dans le Google Sheets
+   configuré.
+3. Après un test réussi, soumettre une inscription de test et confirmer qu’un
+   workflow est déclenché. Supprimer ensuite la réponse de test et vérifier la
+   réconciliation quotidienne.
+
+Le workflow conserve les tableaux existants lorsque la liste de la catégorie
+reste identique. Avant verrouillage, une catégorie dont la liste change reçoit un
+nouveau tirage. Après verrouillage, tout changement de liste bloque la
+publication. L’outil ne fait jamais de force-push.
