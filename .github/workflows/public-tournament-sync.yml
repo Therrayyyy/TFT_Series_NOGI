@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 concurrency:
   group: public-tournament-sync
@@ -24,6 +25,12 @@ jobs:
     steps:
       - name: Check out public site
         uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -40,7 +47,6 @@ jobs:
 
       - name: Download registrations and consented photos
         env:
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           SPREADSHEET_ID: ${{ vars.SPREADSHEET_ID }}
           SYNC_MANIFEST_SPREADSHEET_ID: ${{ vars.SYNC_MANIFEST_SPREADSHEET_ID }}
         run: python automation/sync_public.py

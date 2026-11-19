@@ -14,8 +14,9 @@ from pathlib import Path
 from typing import Sequence
 from urllib.parse import parse_qs, urlparse
 
+import google.auth
+from google.auth.exceptions import DefaultCredentialsError
 import pandas as pd
-from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from openpyxl import load_workbook
@@ -757,17 +758,12 @@ def write_private_json(service, name: str, data: dict) -> None:
 
 
 def get_google_services():
-    raw_credentials = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "")
-    if not raw_credentials:
-        raise SyncError("The Google service account secret is not configured.")
     try:
-        info = json.loads(raw_credentials)
-        credentials = service_account.Credentials.from_service_account_info(
-            info,
-            scopes=GOOGLE_SCOPES,
-        )
-    except (ValueError, KeyError, TypeError) as error:
-        raise SyncError("The Google service account secret is invalid.") from error
+        credentials, _ = google.auth.default(scopes=GOOGLE_SCOPES)
+    except DefaultCredentialsError as error:
+        raise SyncError(
+            "Google credentials are unavailable. Configure GitHub Workload Identity Federation."
+        ) from error
     drive = build("drive", "v3", credentials=credentials, cache_discovery=False)
     sheets = build("sheets", "v4", credentials=credentials, cache_discovery=False)
     return drive, sheets

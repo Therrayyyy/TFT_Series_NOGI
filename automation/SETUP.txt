@@ -44,13 +44,55 @@ GOOGLE CLOUD
 ------------
 1. Dans le projet Google Cloud, activer Google Drive API.
 2. Activer aussi Google Sheets API.
-3. Créer un compte de service et télécharger sa clé JSON. Garder la clé secrète.
-4. Partager le Google Sheets de réponses en lecture avec l’adresse e-mail du compte
-   de service.
-5. Partager en lecture avec ce compte le dossier Drive où les photos envoyées par
+3. Le compte de service `tft-public-sync` n’a besoin d’aucun rôle IAM au niveau
+   du projet. Partager le Google Sheets de réponses en lecture avec son adresse
+   e-mail.
+4. Partager en lecture avec ce compte le dossier Drive où les photos envoyées par
    le formulaire sont enregistrées.
-6. Partager le Google Sheets privé de rapports en modification avec le compte de
-   service.
+5. Partager le Google Sheets privé de rapports en modification avec ce compte.
+
+Ne crée pas de clé JSON. Si la politique Google Cloud bloque les clés, utiliser
+Workload Identity Federation pour que GitHub Actions reçoive des identifiants
+temporaires. Dans Google Cloud Shell, exécuter les commandes suivantes. Elles
+créent un fournisseur limité au dépôt, à la branche `main` et à ce workflow
+précis. Remplacer les deux valeurs demandées par l’identifiant du projet et
+l’adresse e-mail complète du compte de service :
+
+    read -r -p "Google Cloud project ID: " PROJECT_ID
+    read -r -p "Service account email: " SERVICE_ACCOUNT
+    PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
+    POOL_ID="github-actions"
+    PROVIDER_ID="tft-public-sync"
+
+    gcloud services enable iamcredentials.googleapis.com --project="$PROJECT_ID"
+
+    gcloud iam workload-identity-pools create "$POOL_ID" \
+      --project="$PROJECT_ID" \
+      --location="global" \
+      --display-name="GitHub Actions"
+
+    gcloud iam workload-identity-pools providers create-oidc "$PROVIDER_ID" \
+      --project="$PROJECT_ID" \
+      --location="global" \
+      --workload-identity-pool="$POOL_ID" \
+      --display-name="TFT public sync" \
+      --issuer-uri="https://token.actions.githubusercontent.com" \
+      --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository" \
+      --attribute-condition="assertion.repository == 'Therrayyyy/TFT_Series_NOGI' && assertion.ref == 'refs/heads/main' && assertion.workflow_ref == 'Therrayyyy/TFT_Series_NOGI/.github/workflows/public-tournament-sync.yml@refs/heads/main'"
+
+    gcloud iam service-accounts add-iam-policy-binding "$SERVICE_ACCOUNT" \
+      --project="$PROJECT_ID" \
+      --role="roles/iam.workloadIdentityUser" \
+      --member="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/${POOL_ID}/attribute.repository/Therrayyyy/TFT_Series_NOGI"
+
+    echo "projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/${POOL_ID}/providers/${PROVIDER_ID}"
+
+Garder la dernière valeur affichée : c’est l’identifiant du fournisseur à saisir
+dans GitHub. Ces commandes ne créent aucune clé et n’accordent pas de rôle au
+compte de service sur tout le projet. Si la création du pool ou du fournisseur
+est refusée, arrêter et demander à l’administrateur Cloud de vérifier la
+permission de gérer Workload Identity Federation ; ne pas relâcher la politique
+qui interdit les clés.
 
 GITHUB
 ------
@@ -58,12 +100,15 @@ Dans les paramètres du dépôt TFT_Series_NOGI :
 
 1. Dans Actions > General, autoriser les workflows à lire et écrire le contenu du
    dépôt.
-2. Dans Secrets and variables > Actions, créer :
-   - Secret `GOOGLE_SERVICE_ACCOUNT_JSON` : contenu du JSON du compte de service.
-   - Variable `SPREADSHEET_ID` : identifiant du Google Sheets.
+2. Dans Secrets and variables > Actions > Variables, créer :
+   - `GCP_WORKLOAD_IDENTITY_PROVIDER` : ressource complète affichée par la
+     dernière commande Cloud Shell (`projects/.../providers/tft-public-sync`).
+   - `GCP_SERVICE_ACCOUNT` : adresse e-mail du compte `tft-public-sync`.
+   - `SPREADSHEET_ID` : identifiant du Google Sheets de réponses.
    - Variable `SYNC_MANIFEST_SPREADSHEET_ID` : identifiant du Google Sheets privé
      de rapports.
-3. Ne jamais ajouter une clé Google, un token ou un classeur au dépôt Git.
+3. Aucune clé Google n’est nécessaire. Ne jamais ajouter une clé, un token ou un
+   classeur au dépôt Git.
 
 GOOGLE APPS SCRIPT
 ------------------

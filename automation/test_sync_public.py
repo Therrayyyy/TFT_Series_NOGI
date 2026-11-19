@@ -12,6 +12,34 @@ import sync_public
 
 
 class SyncPublicTests(unittest.TestCase):
+    def test_google_services_use_application_default_credentials(self):
+        credentials = object()
+        drive_service = object()
+        sheets_service = object()
+        with (
+            patch.object(
+                sync_public.google.auth,
+                "default",
+                return_value=(credentials, "project-id"),
+            ) as default_credentials,
+            patch.object(
+                sync_public,
+                "build",
+                side_effect=[drive_service, sheets_service],
+            ) as build_service,
+        ):
+            services = sync_public.get_google_services()
+
+        self.assertEqual(services, (drive_service, sheets_service))
+        default_credentials.assert_called_once_with(scopes=sync_public.GOOGLE_SCOPES)
+        self.assertEqual(
+            [call.args[0] for call in build_service.call_args_list],
+            ["drive", "sheets"],
+        )
+        self.assertTrue(
+            all(call.kwargs["credentials"] is credentials for call in build_service.call_args_list)
+        )
+
     def workbook_bytes(self, *, photo_url: str = "") -> bytes:
         workbook = Workbook()
         registrations = workbook.active
