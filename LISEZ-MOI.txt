@@ -31,13 +31,17 @@ informations que l'organisateur est autorise a rendre publiques.
 METTRE A JOUR LE TIRAGE
 -----------------------
 1. L'organisateur prepare le tirage avec sa copie locale privee.
-2. Il remplace le fichier tournament_public.json de ce depot par le fichier de
-   publication genere par son outil local. Ne pas copier le classeur Excel.
+2. S'il a genere un pack ZIP avec des photos, supprimer l'ancien dossier
+   fighter_photos s'il existe, puis decompresser le pack dans ce depot. Sinon,
+   remplacer uniquement tournament_public.json et supprimer fighter_photos
+   s'il n'est plus utilise. Ne pas copier le classeur Excel ni l'archive
+   originale des photos.
 3. Depuis Git Bash, dans le dossier de ce depot, verifier le changement puis
-   envoyer uniquement la mise a jour du tirage:
+   envoyer le JSON et, le cas echeant, les photos publiees:
 
        git status
        git add tournament_public.json
+       git add fighter_photos  # seulement si le dossier existe
        git commit -m "Mise a jour du tirage public"
        git push
 
@@ -68,12 +72,13 @@ REGLES DE COMPETITION
 - 4 combattants ou plus : arbre a elimination directe, avec qualifications
   d'office si necessaire et petite finale pour le bronze.
 - Les combats et leurs liaisons sont consultables dans la page et dans les PDF.
+- Les photos de profil publiees apparaissent dans les tableaux et les PDF.
 
 CONFIDENTIALITE
 ---------------
 Une application Streamlit publique rend son contenu visible a tous les visiteurs.
 Le depot public rend egalement le code et l'historique Git consultables. Avant
-chaque publication, verifier tournament_public.json et ne pas y inclure de
-donnees confidentielles ou d'informations personnelles non autorisees. Remplacer
-ou effacer un fichier dans la version actuelle ne le retire pas automatiquement
-des anciens commits Git.
+chaque publication, verifier tournament_public.json et les photos de
+fighter_photos ; ne publier que les informations et images autorisees, en
+particulier pour les mineurs. Remplacer ou effacer un fichier dans la version
+actuelle ne le retire pas automatiquement des anciens commits Git.

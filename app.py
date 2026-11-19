@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import base64
 import html
 import io
 import json
+import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
+from typing import Any, Sequence
 
 import pandas as pd
 import streamlit as st
@@ -16,6 +18,7 @@ APP_DIR = Path(__file__).resolve().parent
 LOGO_PATH = APP_DIR / "logo_club.png"
 PLANNING_PATH = APP_DIR / "planning_29nov.jpg"
 PUBLIC_TOURNAMENT_PATH = APP_DIR / "tournament_public.json"
+PHOTO_PATH_PATTERN = re.compile(r"fighter_photos/\d{3,}\.jpg")
 
 CATEGORY_LABELS = {
     "M1": "13/14 ans",
@@ -39,6 +42,7 @@ class Fighter:
     age_band: str
     weight: str
     level: str
+    photo_data: bytes | None = None
 
     @property
     def display_name(self) -> str:
@@ -92,6 +96,7 @@ def load_public_tournament() -> tuple[list[Fighter], dict[Category, list[list[Ma
             age_band=value["age_band"],
             weight=value["weight"],
             level=value["level"],
+            photo_data=read_public_photo(value.get("photo")),
         )
 
     fighters: list[Fighter] = []
@@ -157,6 +162,48 @@ def load_public_tournament() -> tuple[list[Fighter], dict[Category, list[list[Ma
         bracket_by_category[category] = rounds
 
     return fighters, bracket_by_category
+
+
+def read_public_photo(value: object) -> bytes | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or PHOTO_PATH_PATTERN.fullmatch(value) is None:
+        raise ValueError("Le chemin d’une photo du fichier public est invalide.")
+    photo_path = APP_DIR / value
+    try:
+        return photo_path.read_bytes()
+    except OSError as error:
+        raise ValueError(
+            f"Impossible de lire la photo publique « {Path(value).name} » : {error}"
+        ) from error
+
+
+def fighter_photo_html(fighter: Fighter | None) -> str:
+    if fighter is None or fighter.photo_data is None:
+        return ""
+    encoded = base64.b64encode(fighter.photo_data).decode("ascii")
+    return f'<img class="fighter-avatar" src="data:image/jpeg;base64,{encoded}" alt="">'
+
+
+def draw_pdf_fighter(
+    pdf: Any,
+    image_reader: Any,
+    fighter: Fighter | None,
+    x: float,
+    y: float,
+    size: int,
+) -> None:
+    if fighter is not None and fighter.photo_data is not None:
+        pdf.drawImage(
+            image_reader(io.BytesIO(fighter.photo_data)),
+            x,
+            y,
+            width=size,
+            height=size,
+            preserveAspectRatio=True,
+            anchor="c",
+            mask="auto",
+        )
 
 
 def wrap_pdf_text(text: str, font_name: str, font_size: float, max_width: float) -> list[str]:
@@ -305,6 +352,7 @@ def fighter_card(
     match: Match,
     number: int | None,
     participants: Sequence[str],
+    participant_fighters: Sequence[Fighter | None],
 ) -> str:
     if match.is_bye:
         heading = "Qualifié d’office"
@@ -313,8 +361,9 @@ def fighter_card(
 
     rows = "".join(
         f'<div class="fighter{" pending" if name.startswith(("À déterminer", "Vainqueur")) else ""}">'
-        f"{html.escape(name)}</div>"
-        for name in participants
+        f"{fighter_photo_html(participant_fighters[index])}"
+        f"<span>{html.escape(name)}</span></div>"
+        for index, name in enumerate(participants)
     )
     return (
         f'<article class="match"><div class="match-heading">{html.escape(heading)}</div>'
@@ -332,8 +381,8 @@ def round_robin_matches(fighters: Sequence[Fighter]) -> list[tuple[Fighter, Figh
 def render_round_robin_html(fighters: Sequence[Fighter]) -> str:
     matches = "".join(
         f'<article class="match"><div class="match-heading">Combat {index}</div>'
-        f'<div class="fighter">{html.escape(first.display_name)}</div>'
-        f'<div class="fighter">{html.escape(second.display_name)}</div></article>'
+        f'<div class="fighter">{fighter_photo_html(first)}<span>{html.escape(first.display_name)}</span></div>'
+        f'<div class="fighter">{fighter_photo_html(second)}<span>{html.escape(second.display_name)}</span></div></article>'
         for index, (first, second) in enumerate(round_robin_matches(fighters), start=1)
     )
     standings = "".join(
@@ -358,7 +407,7 @@ def render_bracket_html(fighters: Sequence[Fighter], rounds: Sequence[Sequence[M
     if len(fighters) == 1:
         return (
             '<div class="solo-card"><strong>Un seul combattant inscrit</strong>'
-            f"<span>{html.escape(fighters[0].display_name)}</span></div>"
+            f'{fighter_photo_html(fighters[0])}<span>{html.escape(fighters[0].display_name)}</span></div>'
         )
 
     layout, final_index = bracket_layout(rounds)
@@ -405,6 +454,7 @@ def render_bracket_html(fighters: Sequence[Fighter], rounds: Sequence[Sequence[M
                 match,
                 match_number,
                 match_participants(match, round_index, rounds, numbers),
+                [match.first] if match.is_bye else [match.first, match.second],
             )
             cards.append(
                 f'<div class="match-position" style="left:{x}px;top:{y}px;'
@@ -495,6 +545,7 @@ def build_pdf(
 ) -> bytes:
     from reportlab.lib.colors import HexColor, white
     from reportlab.lib.pagesizes import A4, landscape
+    from reportlab.lib.utils import ImageReader
     from reportlab.pdfgen import canvas
 
     output = io.BytesIO()
@@ -588,10 +639,18 @@ def build_pdf(
                 pdf.setFont("Helvetica-Bold", 9)
                 pdf.drawString(x + 10, match_bottom + match_height - 14, f"COMBAT {index}")
                 pdf.setFont("Helvetica", 8.5)
-                pdf.drawString(x + 10, match_bottom + 29, first.display_name[:32])
+                draw_pdf_fighter(
+                    pdf, ImageReader, first, x + 10, match_bottom + 25, 16
+                )
+                first_name_x = x + (32 if first.photo_data else 10)
+                pdf.drawString(first_name_x, match_bottom + 29, first.display_name[:32])
                 pdf.setStrokeColor(HexColor("#ecece8"))
                 pdf.line(x + 8, match_bottom + 24, x + match_width - 8, match_bottom + 24)
-                pdf.drawString(x + 10, match_bottom + 8, second.display_name[:32])
+                draw_pdf_fighter(
+                    pdf, ImageReader, second, x + 10, match_bottom + 4, 16
+                )
+                second_name_x = x + (32 if second.photo_data else 10)
+                pdf.drawString(second_name_x, match_bottom + 8, second.display_name[:32])
 
             table_top = match_bottom - 32
             pdf.setFillColor(ink)
@@ -620,7 +679,20 @@ def build_pdf(
                 pdf.rect(table_x, row_y, table_width, row_height, fill=1, stroke=1)
                 pdf.setFillColor(ink)
                 pdf.setFont("Helvetica", 8.5)
-                pdf.drawString(table_x + column_widths[0] + 7, row_y + 11, fighter.display_name[:36])
+                draw_pdf_fighter(
+                    pdf,
+                    ImageReader,
+                    fighter,
+                    table_x + column_widths[0] + 7,
+                    row_y + 7,
+                    17,
+                )
+                name_x = table_x + column_widths[0] + (29 if fighter.photo_data else 7)
+                pdf.drawString(
+                    name_x,
+                    row_y + 11,
+                    fighter.display_name[:36],
+                )
                 column_left = table_x + column_widths[0] + column_widths[1]
                 for width in column_widths[2:]:
                     pdf.rect(column_left, row_y, width, row_height, fill=0, stroke=1)
@@ -678,10 +750,18 @@ def build_pdf(
             pdf.setFont("Helvetica-Bold", 10)
             pdf.drawString(card_x + 14, card_y + card_height_direct - 18, "COMBAT 1")
             pdf.setFont("Helvetica-Bold", 11)
-            pdf.drawString(card_x + 16, card_y + 53, fighters[0].display_name[:48])
+            draw_pdf_fighter(
+                pdf, ImageReader, fighters[0], card_x + 16, card_y + 45, 18
+            )
+            first_name_x = card_x + (40 if fighters[0].photo_data else 16)
+            pdf.drawString(first_name_x, card_y + 53, fighters[0].display_name[:48])
             pdf.setStrokeColor(HexColor("#ecece8"))
             pdf.line(card_x + 12, card_y + 43, card_x + card_width_direct - 12, card_y + 43)
-            pdf.drawString(card_x + 16, card_y + 18, fighters[1].display_name[:48])
+            draw_pdf_fighter(
+                pdf, ImageReader, fighters[1], card_x + 16, card_y + 10, 18
+            )
+            second_name_x = card_x + (40 if fighters[1].photo_data else 16)
+            pdf.drawString(second_name_x, card_y + 18, fighters[1].display_name[:48])
             pdf.setFillColor(muted)
             pdf.setFont("Helvetica", 9)
             pdf.drawCentredString(
@@ -700,7 +780,12 @@ def build_pdf(
             pdf.setFont("Helvetica-Bold", 11)
             pdf.drawString(42, total_height - 100, "UN SEUL COMBATTANT INSCRIT")
             pdf.setFont("Helvetica", 11)
-            pdf.drawString(42, total_height - 117, fighters[0].display_name)
+            draw_pdf_fighter(
+                pdf, ImageReader, fighters[0], 42, total_height - 125, 30
+            )
+            name_x = 80 if fighters[0].photo_data else 42
+            name_y = total_height - (107 if fighters[0].photo_data else 117)
+            pdf.drawString(name_x, name_y, fighters[0].display_name)
             pdf.restoreState()
             pdf.showPage()
             continue
@@ -793,11 +878,23 @@ def build_pdf(
             pdf.setStrokeColor(HexColor("#e8e8e4"))
             pdf.line(x, y + 19, x + card_width, y + 19)
             names = match_participants(match, round_index, rounds, numbers)
+            participant_fighters = (
+                [match.first] if match.is_bye else [match.first, match.second]
+            )
             pdf.setFillColor(ink)
             pdf.setFont("Helvetica-Bold", 8.5)
             for name_index, name in enumerate(names):
                 line_y = y + card_height - 31 - name_index * 17
-                pdf.drawString(x + 7, line_y, name[:25])
+                fighter = participant_fighters[name_index]
+                draw_pdf_fighter(
+                    pdf,
+                    ImageReader,
+                    fighter,
+                    x + 5,
+                    line_y - 4,
+                    14,
+                )
+                pdf.drawString(x + (24 if fighter and fighter.photo_data else 7), line_y, name[:23])
 
         if has_third_place and third_place_number is not None:
             bronze_x, bronze_y, bronze_width, bronze_height = (
@@ -926,20 +1023,27 @@ def apply_styles() -> None:
         }
         .match-position { position:absolute; z-index:1; }
         .match {
-          height:100%; overflow:hidden; border:1px solid #deded9;
+          box-sizing:border-box; height:100%; overflow:hidden; border:1px solid #deded9;
           border-radius:8px; background:#ffffff;
           box-shadow:0 2px 8px #1111110b;
         }
         .match-heading {
-          height:27px; padding:6px 9px; background:#f2f2ef;
+          box-sizing:border-box; height:27px; padding:6px 9px; background:#f2f2ef;
           color:#66665e; font-size:.68rem; font-weight:800;
           letter-spacing:.05em; text-transform:uppercase;
         }
         .match:has(.fighter:only-child) .match-heading { background:#fff5bf; color:#716000; }
         .fighter {
-          height:29px; padding:6px 9px; border-top:1px solid #ecece8;
-          color:#171717; font-size:.76rem; font-weight:650;
-          overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+          box-sizing:border-box; display:flex; align-items:center; gap:7px;
+          height:29px; padding:3px 8px; border-top:1px solid #ecece8;
+          color:#171717; font-size:.76rem; font-weight:650; overflow:hidden;
+        }
+        .fighter-avatar {
+          flex:0 0 22px; width:22px; height:22px; border-radius:50%;
+          object-fit:cover; background:#ecece8;
+        }
+        .fighter span {
+          min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
         }
         .fighter.pending {
           color:#77776f; background:#f8f8f6; font-style:italic;
@@ -969,6 +1073,7 @@ def apply_styles() -> None:
         }
         .solo-card strong { color:#776500; font-size:.75rem; text-transform:uppercase; }
         .solo-card span { font-weight:700; }
+        .solo-card .fighter-avatar { width:64px; height:64px; flex-basis:64px; }
         @media print {
           @page { size: landscape; margin: 10mm; }
           .stApp { background:white; }
@@ -1013,7 +1118,8 @@ def apply_styles() -> None:
             box-sizing:border-box; width:100%; height:76px; break-inside:avoid;
           }
           .round-robin .match-heading { height:24px; padding:5px 8px; }
-          .round-robin .fighter { height:25px; padding:5px 8px; }
+          .round-robin .fighter { height:25px; padding:3px 8px; }
+          .round-robin .fighter-avatar { width:18px; height:18px; flex-basis:18px; }
           .standings { width:100%; }
           .standings thead { display:table-header-group; }
           .standings tr { break-inside:avoid; page-break-inside:avoid; }
@@ -1042,8 +1148,6 @@ def main() -> None:
 
     logo_html = ""
     if LOGO_PATH.exists():
-        import base64
-
         encoded_logo = base64.b64encode(LOGO_PATH.read_bytes()).decode("ascii")
         logo_html = f'<img src="data:image/png;base64,{encoded_logo}" alt="Tactical Fight Team">'
 
