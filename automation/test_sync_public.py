@@ -7,11 +7,36 @@ from unittest.mock import patch
 
 import pandas as pd
 from openpyxl import Workbook
+from PIL import Image
 
 import sync_public
 
 
 class SyncPublicTests(unittest.TestCase):
+    def test_smart_square_crop_uses_face_anchor_for_lower_face(self):
+        image = Image.new("RGB", (400, 400), "white")
+        with patch.object(
+            sync_public,
+            "detect_face_anchor",
+            return_value=(200, 350),
+        ):
+            cropped = sync_public.smart_square_crop(image)
+
+        self.assertEqual(cropped.size, sync_public.PHOTO_SIZE)
+
+        original_anchor = (200, 350)
+        side = 400
+        top = round(original_anchor[1] - side / 2)
+        self.assertGreater(top, 0)
+        self.assertEqual(top, 150)
+
+    def test_smart_square_crop_falls_back_to_center(self):
+        image = Image.new("RGB", (500, 300), "white")
+        with patch.object(sync_public, "detect_face_anchor", return_value=None):
+            cropped = sync_public.smart_square_crop(image)
+
+        self.assertEqual(cropped.size, sync_public.PHOTO_SIZE)
+
     def test_google_services_use_application_default_credentials(self):
         credentials = object()
         drive_service = object()

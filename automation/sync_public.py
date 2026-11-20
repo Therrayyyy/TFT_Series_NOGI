@@ -22,6 +22,13 @@ from googleapiclient.errors import HttpError
 from openpyxl import load_workbook
 from PIL import Image, ImageOps
 
+try:
+    import cv2
+    import numpy as np
+except ImportError:
+    cv2 = None
+    np = None
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SHEET_ID = os.environ.get(
@@ -44,6 +51,9 @@ MAX_PHOTO_COUNT = 100
 MAX_PHOTO_FILE_BYTES = 15 * 1024 * 1024
 MAX_PHOTO_TOTAL_BYTES = 50 * 1024 * 1024
 PHOTO_SIZE = (320, 320)
+
+FACE_CASCADE = None
+EYE_CASCADE = None
 
 WEIGHT_COLUMNS = {
     "F": ("Catégorie de poids - Féminines", "Catégorie de poids (F)"),
@@ -392,6 +402,107 @@ def extract_sheet_links(workbook: bytes) -> tuple[dict[int, str], dict[int, bool
     return links, consent
 
 
+def detect_face_anchor(image: Image.Image) -> tuple[int, int] | None:
+    if cv2 is None or np is None:
+        return None
+
+    global FACE_CASCADE, EYE_CASCADE
+    if FACE_CASCADE is None:
+        cascade_path = cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+        FACE_CASCADE = cv2.CascadeClassifier(cascade_path)
+    if EYE_CASCADE is None:
+        eye_cascade_path = cv2.data.haarcascades + "haarcascade_eye.xml"
+        EYE_CASCADE = cv2.CascadeClassifier(eye_cascade_path)
+    if FACE_CASCADE.empty():
+        return None
+
+    width, height = image.size
+    largest_side = max(width, height)
+    if largest_side > 1200:
+        scale = 1200 / largest_side
+        analysis_image = image.resize(
+            (max(1, round(width * scale)), max(1, round(height * scale))),
+            Image.Resampling.LANCZOS,
+        )
+    else:
+        scale = 1.0
+        analysis_image = image
+
+    gray = cv2.cvtColor(np.asarray(analysis_image.convert("RGB")), cv2.COLOR_RGB2GRAY)
+    faces = FACE_CASCADE.detectMultiScale(
+        gray,
+        scaleFactor=1.05,
+        minNeighbors=3,
+        minSize=(24, 24),
+    )
+    if len(faces) == 0:
+        hsv = cv2.cvtColor(np.asarray(analysis_image.convert("RGB")), cv2.COLOR_RGB2HSV)
+        lower_skin = np.array([0, 20, 60], dtype=np.uint8)
+        upper_skin = np.array([25, 170, 255], dtype=np.uint8)
+        skin_mask = cv2.inRange(hsv, lower_skin, upper_skin)
+        kernel = np.ones((9, 9), dtype=np.uint8)
+        skin_mask = cv2.morphologyEx(skin_mask, cv2.MORPH_CLOSE, kernel)
+        contours, _ = cv2.findContours(
+            skin_mask,
+            cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_SIMPLE,
+        )
+        if contours:
+            largest = max(contours, key=cv2.contourArea)
+            area = cv2.contourArea(largest)
+            image_area = gray.shape[0] * gray.shape[1]
+            if area >= image_area * 0.02:
+                moments = cv2.moments(largest)
+                if moments["m00"] > 0:
+                    anchor_x = moments["m10"] / moments["m00"]
+                    anchor_y = moments["m01"] / moments["m00"]
+                    return round(anchor_x / scale), round(anchor_y / scale)
+        return None
+
+    x, y, face_width, face_height = max(
+        faces,
+        key=lambda face: int(face[2]) * int(face[3]),
+    )
+    eyes: tuple[object, ...] = ()
+    if not EYE_CASCADE.empty():
+        face_roi = gray[y : y + int(face_height * 0.65), x : x + face_width]
+        eyes = tuple(EYE_CASCADE.detectMultiScale(face_roi, scaleFactor=1.1, minNeighbors=4))
+
+    if eyes:
+        eye_x = sum(int(eye[0]) + int(eye[2]) // 2 for eye in eyes) / len(eyes)
+        eye_y = sum(int(eye[1]) + int(eye[3]) // 2 for eye in eyes) / len(eyes)
+        anchor_x = x + eye_x
+        anchor_y = y + eye_y
+    else:
+        anchor_x = x + face_width / 2
+        anchor_y = y + face_height / 2
+
+    return round(anchor_x / scale), round(anchor_y / scale)
+
+
+def smart_square_crop(image: Image.Image) -> Image.Image:
+    width, height = image.size
+    side = min(width, height)
+    if side == 0:
+        return image.resize(PHOTO_SIZE, Image.Resampling.LANCZOS)
+
+    anchor = detect_face_anchor(image)
+    if anchor is None:
+        return ImageOps.fit(
+            image,
+            PHOTO_SIZE,
+            method=Image.Resampling.LANCZOS,
+        )
+
+    anchor_x, anchor_y = anchor
+    left = round(anchor_x - side / 2)
+    top = round(anchor_y - side / 2)
+    left = min(max(left, 0), max(0, width - side))
+    top = min(max(top, 0), max(0, height - side))
+    cropped = image.crop((left, top, left + side, top + side))
+    return cropped.resize(PHOTO_SIZE, Image.Resampling.LANCZOS)
+
+
 def consented_photos(
     service,
     registrations: pd.DataFrame,
@@ -480,11 +591,7 @@ def consented_photos(
                 if image.width * image.height > 40_000_000:
                     raise SyncError(f"Authorized photo at row {row_number} is too large.")
                 image = ImageOps.exif_transpose(image).convert("RGB")
-                image = ImageOps.fit(
-                    image,
-                    PHOTO_SIZE,
-                    method=Image.Resampling.LANCZOS,
-                )
+                image = smart_square_crop(image)
                 output = io.BytesIO()
                 image.save(output, format="JPEG", quality=84, optimize=True)
                 normalized_image = output.getvalue()

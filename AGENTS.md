@@ -19,7 +19,9 @@ exports, private manifests, OAuth credentials, service-account keys, or tokens.
 - `automation/sync_public.py` exports the first worksheet and extracts its
   embedded Drive photo hyperlinks, validates registrations, downloads submitted
   photos, preserves valid unchanged brackets, and writes the private manifest
-  and status to the `PhotoManifest` and `SyncStatus` tabs.
+  and status to the `PhotoManifest` and `SyncStatus` tabs. Submitted photos are
+  normalized to square JPEGs; local Haar face/eye detection aligns the crop
+  when a face is found, with centered Pillow cropping as a safe fallback.
 - `SyncConfig!A1` is `BRACKETS_LOCKED`; `B1` is `FALSE` while draws may change
   and `TRUE` when they must be frozen. A roster change while locked must stop
   publication.

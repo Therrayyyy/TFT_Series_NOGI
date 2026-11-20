@@ -3,3 +3,4 @@ google-auth
 openpyxl
 pandas
 pillow
+opencv-python-headless==4.11.0.86
