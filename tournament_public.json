@@ -397,34 +397,17 @@
           "weight": "-85",
           "level": "Débutant ( -1,5 ans)",
           "photo": "fighter_photos/015.jpg"
+        },
+        {
+          "last_name": "Soler",
+          "first_name": "Kalvyn",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-85",
+          "level": "Débutant ( -1,5 ans)"
         }
       ],
-      "rounds": [
-        [
-          {
-            "index": 0,
-            "first": {
-              "last_name": "Ojeda",
-              "first_name": "Ghislain",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-85",
-              "level": "Débutant ( -1,5 ans)",
-              "photo": "fighter_photos/014.jpg"
-            },
-            "second": {
-              "last_name": "De Yzaguirre",
-              "first_name": "Tom",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-85",
-              "level": "Débutant ( -1,5 ans)",
-              "photo": "fighter_photos/015.jpg"
-            },
-            "is_bye": false
-          }
-        ]
-      ]
+      "rounds": []
     },
     {
       "category": [
@@ -476,7 +459,7 @@
           "age_band": "M3",
           "weight": "+85",
           "level": "Intermédiaire ( +1,5 ans & -4 ans)",
-          "photo": "fighter_photos/017.jpg"
+          "photo": "fighter_photos/018.jpg"
         },
         {
           "last_name": "Panepinto",
@@ -498,7 +481,7 @@
               "age_band": "M3",
               "weight": "+85",
               "level": "Intermédiaire ( +1,5 ans & -4 ans)",
-              "photo": "fighter_photos/017.jpg"
+              "photo": "fighter_photos/018.jpg"
             },
             "second": {
               "last_name": "Panepinto",
