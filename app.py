@@ -252,6 +252,18 @@ def category_sort_key(category: Category) -> tuple[int, int, int, str]:
     return sex_order, age_order, weight_order, level
 
 
+def display_weight(category: Category) -> str:
+    sex, age_band, weight, level = category
+    if (
+        sex == "Homme"
+        and age_band == "M3"
+        and weight == "-68"
+        and level == "intermediaire ( +1,5 ans & -4 ans)"
+    ):
+        return "Open -68/-75 kg"
+    return f"{weight} kg"
+
+
 def round_label(round_index: int, round_count: int) -> str:
     if round_count == 1:
         return "Finale"
@@ -576,7 +588,7 @@ def build_pdf(
         sex, age_band, weight, level = category
         level_text = "" if level == "unique" else f" | {fighters[0].level}"
         title = (
-            f"{sex} | {CATEGORY_LABELS[age_band]} | {weight} kg"
+            f"{sex} | {CATEGORY_LABELS[age_band]} | {display_weight(category)}"
             f"{level_text} | {len(fighters)} combattant"
             f"{'s' if len(fighters) > 1 else ''}"
         )
@@ -942,7 +954,7 @@ def render_category(category: Category, fighters: list[Fighter]) -> None:
     sex, age_band, weight, normalized_level = category
     level_text = "" if normalized_level == "unique" else f" · {fighters[0].level}"
     count_text = f"{len(fighters)} combattant{'s' if len(fighters) > 1 else ''}"
-    title = f"{sex} · {CATEGORY_LABELS[age_band]} · {weight} kg{level_text} · {count_text}"
+    title = f"{sex} · {CATEGORY_LABELS[age_band]} · {display_weight(category)}{level_text} · {count_text}"
     rounds = st.session_state["tournament_brackets"][category]
     with st.container(key=f"print-category-{category_filename(category)}"):
         with st.expander(title, expanded=False):
@@ -1199,7 +1211,7 @@ def main() -> None:
             {
                 "Sexe": category[0],
                 "Tranche d’âge": CATEGORY_LABELS[category[1]],
-                "Poids": f"{category[2]} kg",
+                "Poids": display_weight(category),
                 "Niveau": "" if category[3] == "unique" else category_fighters[0].level,
                 "Combattants": len(category_fighters),
             }
