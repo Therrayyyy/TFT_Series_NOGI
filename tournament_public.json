@@ -486,41 +486,6 @@
       "category": [
         "Femme",
         "F",
-        "-60",
-        "unique"
-      ],
-      "fighters": [
-        {
-          "last_name": "DAVEZAC - - MEVIZOU",
-          "first_name": "Noemie",
-          "sex": "Femme",
-          "age_band": "F",
-          "weight": "-60",
-          "level": "Unique"
-        }
-      ],
-      "rounds": [
-        [
-          {
-            "index": 0,
-            "first": {
-              "last_name": "DAVEZAC - - MEVIZOU",
-              "first_name": "Noemie",
-              "sex": "Femme",
-              "age_band": "F",
-              "weight": "-60",
-              "level": "Unique"
-            },
-            "second": null,
-            "is_bye": false
-          }
-        ]
-      ]
-    },
-    {
-      "category": [
-        "Femme",
-        "F",
         "+60",
         "unique"
       ],
@@ -528,6 +493,14 @@
         {
           "last_name": "Le Goff",
           "first_name": "Léa",
+          "sex": "Femme",
+          "age_band": "F",
+          "weight": "+60",
+          "level": "Unique"
+        },
+        {
+          "last_name": "DAVEZAC - - MEVIZOU",
+          "first_name": "Noemie",
           "sex": "Femme",
           "age_band": "F",
           "weight": "+60",
@@ -546,7 +519,14 @@
               "weight": "+60",
               "level": "Unique"
             },
-            "second": null,
+            "second": {
+              "last_name": "DAVEZAC - - MEVIZOU",
+              "first_name": "Noemie",
+              "sex": "Femme",
+              "age_band": "F",
+              "weight": "+60",
+              "level": "Unique"
+            },
             "is_bye": false
           }
         ]
