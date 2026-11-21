@@ -39,43 +39,6 @@
     {
       "category": [
         "Homme",
-        "M2",
-        "+65",
-        "unique"
-      ],
-      "fighters": [
-        {
-          "last_name": "JEAN",
-          "first_name": "Hugo",
-          "sex": "Homme",
-          "age_band": "M2",
-          "weight": "+65",
-          "level": "Unique",
-          "photo": "fighter_photos/001.jpg"
-        }
-      ],
-      "rounds": [
-        [
-          {
-            "index": 0,
-            "first": {
-              "last_name": "JEAN",
-              "first_name": "Hugo",
-              "sex": "Homme",
-              "age_band": "M2",
-              "weight": "+65",
-              "level": "Unique",
-              "photo": "fighter_photos/001.jpg"
-            },
-            "second": null,
-            "is_bye": false
-          }
-        ]
-      ]
-    },
-    {
-      "category": [
-        "Homme",
         "M3",
         "-68",
         "debutant ( -1,5 ans)"
@@ -88,7 +51,7 @@
           "age_band": "M3",
           "weight": "-68",
           "level": "Débutant ( -1,5 ans)",
-          "photo": "fighter_photos/002.jpg"
+          "photo": "fighter_photos/001.jpg"
         },
         {
           "last_name": "ZERARGA",
@@ -105,11 +68,20 @@
           "age_band": "M3",
           "weight": "-68",
           "level": "Débutant ( -1,5 ans)",
-          "photo": "fighter_photos/004.jpg"
+          "photo": "fighter_photos/003.jpg"
         },
         {
           "last_name": "Dam",
           "first_name": "Daven",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-68",
+          "level": "Débutant ( -1,5 ans)",
+          "photo": "fighter_photos/004.jpg"
+        },
+        {
+          "last_name": "JEAN",
+          "first_name": "Hugo",
           "sex": "Homme",
           "age_band": "M3",
           "weight": "-68",
@@ -140,13 +112,13 @@
           {
             "index": 0,
             "first": {
-              "last_name": "Goin",
-              "first_name": "Benjamin",
+              "last_name": "Dam",
+              "first_name": "Daven",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "-68",
               "level": "Débutant ( -1,5 ans)",
-              "photo": "fighter_photos/007.jpg"
+              "photo": "fighter_photos/004.jpg"
             },
             "second": null,
             "is_bye": true
@@ -154,16 +126,24 @@
           {
             "index": 1,
             "first": {
-              "last_name": "Arthur",
-              "first_name": "Robles",
+              "last_name": "Pollet",
+              "first_name": "Lucas",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "-68",
               "level": "Débutant ( -1,5 ans)",
-              "photo": "fighter_photos/002.jpg"
+              "photo": "fighter_photos/006.jpg"
             },
-            "second": null,
-            "is_bye": true
+            "second": {
+              "last_name": "JEAN",
+              "first_name": "Hugo",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-68",
+              "level": "Débutant ( -1,5 ans)",
+              "photo": "fighter_photos/005.jpg"
+            },
+            "is_bye": false
           },
           {
             "index": 2,
@@ -174,22 +154,9 @@
               "age_band": "M3",
               "weight": "-68",
               "level": "Débutant ( -1,5 ans)",
-              "photo": "fighter_photos/004.jpg"
+              "photo": "fighter_photos/003.jpg"
             },
             "second": {
-              "last_name": "Dam",
-              "first_name": "Daven",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-68",
-              "level": "Débutant ( -1,5 ans)",
-              "photo": "fighter_photos/005.jpg"
-            },
-            "is_bye": false
-          },
-          {
-            "index": 3,
-            "first": {
               "last_name": "ZERARGA",
               "first_name": "Macéo",
               "sex": "Homme",
@@ -197,22 +164,20 @@
               "weight": "-68",
               "level": "Débutant ( -1,5 ans)"
             },
-            "second": {
-              "last_name": "Pollet",
-              "first_name": "Lucas",
+            "is_bye": false
+          },
+          {
+            "index": 3,
+            "first": {
+              "last_name": "Arthur",
+              "first_name": "Robles",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "-68",
               "level": "Débutant ( -1,5 ans)",
-              "photo": "fighter_photos/006.jpg"
+              "photo": "fighter_photos/001.jpg"
             },
-            "is_bye": false
-          }
-        ],
-        [
-          {
-            "index": 0,
-            "first": {
+            "second": {
               "last_name": "Goin",
               "first_name": "Benjamin",
               "sex": "Homme",
@@ -221,15 +186,22 @@
               "level": "Débutant ( -1,5 ans)",
               "photo": "fighter_photos/007.jpg"
             },
-            "second": {
-              "last_name": "Arthur",
-              "first_name": "Robles",
+            "is_bye": false
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "Dam",
+              "first_name": "Daven",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "-68",
               "level": "Débutant ( -1,5 ans)",
-              "photo": "fighter_photos/002.jpg"
+              "photo": "fighter_photos/004.jpg"
             },
+            "second": null,
             "is_bye": false
           },
           {
