@@ -371,41 +371,6 @@
       "category": [
         "Homme",
         "M3",
-        "-85",
-        "intermediaire ( +1,5 ans & -4 ans)"
-      ],
-      "fighters": [
-        {
-          "last_name": "Davis",
-          "first_name": "Adlai",
-          "sex": "Homme",
-          "age_band": "M3",
-          "weight": "-85",
-          "level": "Intermédiaire ( +1,5 ans & -4 ans)"
-        }
-      ],
-      "rounds": [
-        [
-          {
-            "index": 0,
-            "first": {
-              "last_name": "Davis",
-              "first_name": "Adlai",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-85",
-              "level": "Intermédiaire ( +1,5 ans & -4 ans)"
-            },
-            "second": null,
-            "is_bye": false
-          }
-        ]
-      ]
-    },
-    {
-      "category": [
-        "Homme",
-        "M3",
         "+85",
         "intermediaire ( +1,5 ans & -4 ans)"
       ],
@@ -417,7 +382,7 @@
           "age_band": "M3",
           "weight": "+85",
           "level": "Intermédiaire ( +1,5 ans & -4 ans)",
-          "photo": "fighter_photos/019.jpg"
+          "photo": "fighter_photos/018.jpg"
         },
         {
           "last_name": "Panepinto",
@@ -426,33 +391,17 @@
           "age_band": "M3",
           "weight": "+85",
           "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+        },
+        {
+          "last_name": "Davis",
+          "first_name": "Adlai",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "+85",
+          "level": "Intermédiaire ( +1,5 ans & -4 ans)"
         }
       ],
-      "rounds": [
-        [
-          {
-            "index": 0,
-            "first": {
-              "last_name": "Trech",
-              "first_name": "Allan",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "+85",
-              "level": "Intermédiaire ( +1,5 ans & -4 ans)",
-              "photo": "fighter_photos/019.jpg"
-            },
-            "second": {
-              "last_name": "Panepinto",
-              "first_name": "Paul",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "+85",
-              "level": "Intermédiaire ( +1,5 ans & -4 ans)"
-            },
-            "is_bye": false
-          }
-        ]
-      ]
+      "rounds": []
     },
     {
       "category": [
