@@ -1612,6 +1612,23 @@ def main() -> None:
     for category, category_fighters in grouped.items():
         render_category(category, category_fighters, global_numbers)
 
+    try:
+        pdf_bytes = build_pdf(
+            grouped,
+            st.session_state["tournament_brackets"],
+            global_numbers,
+        )
+    except ImportError:
+        st.warning("L’export PDF nécessite reportlab. Vous pouvez imprimer cette page avec Ctrl+P.")
+    else:
+        st.download_button(
+            "Télécharger les tableaux en PDF",
+            data=pdf_bytes,
+            file_name="TFT_Serie_No-GI_1_tableaux.pdf",
+            mime="application/pdf",
+            type="primary",
+        )
+
     st.subheader("Ordre de passage")
     if not schedule_bouts:
         st.info("L’ordre de passage sera disponible dès qu’au moins deux combats seront publiés.")
@@ -1641,21 +1658,5 @@ def main() -> None:
                         key="schedule-pdf",
                     )
 
-    try:
-        pdf_bytes = build_pdf(
-            grouped,
-            st.session_state["tournament_brackets"],
-            global_numbers,
-        )
-    except ImportError:
-        st.warning("L’export PDF nécessite reportlab. Vous pouvez imprimer cette page avec Ctrl+P.")
-    else:
-        st.download_button(
-            "Télécharger les tableaux en PDF",
-            data=pdf_bytes,
-            file_name="TFT_Serie_No-GI_1_tableaux.pdf",
-            mime="application/pdf",
-            type="primary",
-        )
 if __name__ == "__main__":
     main()
