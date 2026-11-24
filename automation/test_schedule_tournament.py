@@ -61,6 +61,25 @@ class TournamentScheduleTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             generate_schedule(unknown, nb_tatamis=2)
 
+    def test_public_brackets_generate_a_complete_valid_schedule(self) -> None:
+        import app
+
+        fighters, brackets = app.load_public_tournament()
+        grouped = app.group_fighters(fighters)
+        bouts = app.public_schedule_bouts(grouped, brackets)
+        ids = {bout["id"] for bout in bouts}
+        unknown = [
+            dependency
+            for bout in bouts
+            for dependency in bout["dependances"]
+            if dependency not in ids
+        ]
+        self.assertEqual(unknown, [])
+        frame, report = generate_schedule(bouts, nb_tatamis=1, seed=20261128)
+        self.assertEqual(len(frame), len(bouts))
+        self.assertEqual(report["missing_bouts"], [])
+        self.assertEqual(report["duplicate_bouts"], 0)
+
 
 if __name__ == "__main__":
     unittest.main()

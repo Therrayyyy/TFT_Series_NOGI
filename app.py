@@ -496,8 +496,6 @@ def public_schedule_bouts(
                     continue
                 bout_id = f"{category_filename(category)}-{round_index + 1}-{match.index + 1}"
                 bout_ids[(round_index, match.index)] = bout_id
-                if match.first is None or match.second is None:
-                    continue
 
                 dependencies: list[str] = []
                 if round_index > 0:
@@ -506,12 +504,26 @@ def public_schedule_bouts(
                         if source_id is not None:
                             dependencies.append(source_id)
 
+                def participant_name(
+                    fighter: Fighter | None,
+                    slot_index: int,
+                ) -> str:
+                    if fighter is not None:
+                        return fighter.display_name
+                    if round_index == 0:
+                        return "À déterminer"
+                    source_index = match.index * 2 + slot_index
+                    source_id = bout_ids.get((round_index - 1, source_index))
+                    if source_id is not None:
+                        return f"Vainqueur du combat {source_id}"
+                    return "À déterminer"
+
                 add_bout(
                     bout_id,
                     category_name,
                     phase,
-                    match.first.display_name,
-                    match.second.display_name,
+                    participant_name(match.first, 0),
+                    participant_name(match.second, 1),
                     dependencies,
                 )
 
@@ -1345,12 +1357,8 @@ def main() -> None:
         render_category(category, category_fighters)
 
     st.subheader("Ordre de passage")
-    nb_tatamis = st.radio(
-        "Nombre de tatamis",
-        options=(1, 2),
-        index=1,
-        horizontal=True,
-    )
+    st.caption("Planning généré automatiquement sur 1 tatami.")
+    nb_tatamis = 1
     schedule_bouts = public_schedule_bouts(grouped, public_brackets)
     if not schedule_bouts:
         st.info("L’ordre de passage sera disponible dès qu’au moins deux combats seront publiés.")
