@@ -298,6 +298,28 @@ def combat_numbers(rounds: Sequence[Sequence[Match]]) -> dict[tuple[int, int], i
     return numbers
 
 
+def category_bout_id(category: Category, round_index: int, match_index: int) -> str:
+    return f"{category_filename(category)}-{round_index + 1}-{match_index + 1}"
+
+
+def global_combat_numbers(
+    category: Category,
+    rounds: Sequence[Sequence[Match]],
+    global_numbers: dict[str, int] | None,
+) -> dict[tuple[int, int], int]:
+    if not global_numbers:
+        return combat_numbers(rounds)
+    return {
+        (round_index, match.index): global_numbers[
+            category_bout_id(category, round_index, match.index)
+        ]
+        for round_index, round_matches in enumerate(rounds)
+        for match in round_matches
+        if not match.is_bye
+        and category_bout_id(category, round_index, match.index) in global_numbers
+    }
+
+
 def bracket_layout(rounds: Sequence[Sequence[Match]]) -> tuple[list[tuple[int, str]], int]:
     """Return (round index, side) columns and the final column index."""
     final_index = len(rounds) - 1
@@ -359,7 +381,7 @@ def match_participants(
             source_number = numbers.get((round_index - 1, source_match.index))
             if source_number is None:
                 raise ValueError("Combat source manquant pour un participant du tableau.")
-            participants.append(f"Vainqueur du combat {source_number}")
+            participants.append(f"Vainqueur Combat #{source_number}")
         else:
             participants.append("À déterminer")
     return participants
@@ -374,7 +396,7 @@ def fighter_card(
     if match.is_bye:
         heading = "Qualifié d’office"
     else:
-        heading = f"Combat {number}"
+        heading = f"COMBAT #{number}" if number is not None else "COMBAT"
 
     rows = "".join(
         f'<div class="fighter{" pending" if name.startswith(("À déterminer", "Vainqueur")) else ""}">'
@@ -395,9 +417,21 @@ def round_robin_matches(fighters: Sequence[Fighter]) -> list[tuple[Fighter, Figh
     return [(first, second), (second, third), (first, third)]
 
 
-def render_round_robin_html(fighters: Sequence[Fighter]) -> str:
+def render_round_robin_html(
+    fighters: Sequence[Fighter],
+    category: Category | None = None,
+    global_numbers: dict[str, int] | None = None,
+) -> str:
+    bout_numbers: dict[int, int] = {}
+    if category is not None and global_numbers:
+        for index in range(1, 4):
+            bout_numbers[index] = global_numbers[
+                f"{category_filename(category)}-P{index}"
+            ]
+
     matches = "".join(
-        f'<article class="match"><div class="match-heading">Combat {index}</div>'
+        f'<article class="match"><div class="match-heading">'
+        f"COMBAT #{bout_numbers.get(index, index)}</div>"
         f'<div class="fighter">{fighter_photo_html(first)}<span>{html.escape(first.display_name)}</span></div>'
         f'<div class="fighter">{fighter_photo_html(second)}<span>{html.escape(second.display_name)}</span></div></article>'
         for index, (first, second) in enumerate(round_robin_matches(fighters), start=1)
@@ -538,17 +572,94 @@ def public_schedule_bouts(
                 f"{category_filename(category)}-B",
                 category_name,
                 "Petite Finale",
-                "Perdant de la demi-finale 1",
-                "Perdant de la demi-finale 2",
+                f"Perdant du combat {semi_ids[0]}" if semi_ids else "Perdant de la demi-finale 1",
+                f"Perdant du combat {semi_ids[1]}" if len(semi_ids) > 1 else "Perdant de la demi-finale 2",
                 semi_ids,
             )
 
     return bouts
 
 
-def render_bracket_html(fighters: Sequence[Fighter], rounds: Sequence[Sequence[Match]]) -> str:
+def schedule_category_badge(category_text: str) -> str:
+    for marker in (" | ", " · "):
+        if marker in category_text:
+            parts = [part.strip() for part in category_text.split(marker)]
+            break
+    else:
+        parts = [category_text]
+    weight = next(
+        (part for part in parts if re.search(r"(?:[+-]\d+|Open)", part)),
+        "",
+    )
+    level = next(
+        (part for part in parts if "Débutant" in part or "Intermédiaire" in part),
+        "",
+    )
+    label = weight
+    if "Débutant" in level:
+        label = f"{weight} Déb."
+    elif "Intermédiaire" in level:
+        label = f"{weight} Int."
+    return html.escape(label or category_text[:24])
+
+
+def render_schedule_html(
+    frame: pd.DataFrame,
+    fighters: Sequence[Fighter],
+) -> str:
+    fighter_by_name = {fighter.display_name: fighter for fighter in fighters}
+    rows: list[str] = []
+    for row in frame.itertuples(index=False, name=None):
+        values = dict(zip(frame.columns, row))
+        number = int(values["Ordre (#)"])
+        phase = str(values["Phase"])
+        accent = phase in ("Petite Finale", "Finale")
+        badge_class = " accent" if accent else ""
+
+        def fighter_html(name: object) -> str:
+            text = str(name)
+            fighter = fighter_by_name.get(text)
+            if fighter is not None and fighter.photo_data is not None:
+                return (
+                    f'<span class="schedule-fighter">'
+                    f"{fighter_photo_html(fighter)}"
+                    f"<span>{html.escape(text)}</span></span>"
+                )
+            parts = text.strip().split()
+            initials = "".join(part[0] for part in parts[:2]).upper() if parts else "?"
+            return (
+                f'<span class="schedule-fighter">'
+                f'<span class="schedule-avatar">{html.escape(initials)}</span>'
+                f"<span>{html.escape(text)}</span></span>"
+            )
+
+        rows.append(
+            "<tr>"
+            f'<td><span class="schedule-number{badge_class}">#{number}</span></td>'
+            f'<td class="schedule-time">{html.escape(str(values["Heure estimée"]))}</td>'
+            f'<td><span class="schedule-category">{schedule_category_badge(str(values["Catégorie"]))}</span>'
+            f'<span class="schedule-phase">{html.escape(phase)}</span></td>'
+            f"<td>{fighter_html(values['Combattant A'])}</td>"
+            '<td class="schedule-vs">VS</td>'
+            f"<td>{fighter_html(values['Combattant B'])}</td>"
+            "</tr>"
+        )
+    return (
+        '<div class="schedule-table-wrap"><table class="schedule-table">'
+        "<thead><tr><th>N°</th><th>Heure</th><th>Catégorie &amp; Phase</th>"
+        "<th>Combattant A</th><th>VS</th><th>Combattant B</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table></div>"
+    )
+
+
+def render_bracket_html(
+    fighters: Sequence[Fighter],
+    rounds: Sequence[Sequence[Match]],
+    category: Category | None = None,
+    global_numbers: dict[str, int] | None = None,
+) -> str:
     if len(fighters) == 3:
-        return render_round_robin_html(fighters)
+        return render_round_robin_html(fighters, category, global_numbers)
     if len(fighters) == 1:
         return (
             '<div class="solo-card"><strong>Un seul combattant inscrit</strong>'
@@ -557,9 +668,21 @@ def render_bracket_html(fighters: Sequence[Fighter], rounds: Sequence[Sequence[M
 
     layout, final_index = bracket_layout(rounds)
     single_left = len(rounds[0]) <= 4
-    numbers = combat_numbers(rounds)
+    numbers = (
+        global_combat_numbers(category, rounds, global_numbers)
+        if category is not None
+        else combat_numbers(rounds)
+    )
     has_third_place = len(fighters) >= 4 and len(rounds) >= 2 and len(rounds[-2]) == 2
-    third_place_number = len(numbers) + 1 if has_third_place else None
+    if has_third_place:
+        bronze_id = f"{category_filename(category)}-B" if category is not None else ""
+        third_place_number = (
+            global_numbers.get(bronze_id)
+            if global_numbers and bronze_id in global_numbers
+            else len(numbers) + 1
+        )
+    else:
+        third_place_number = None
     card_width, card_height, gap = 190, 88, 74
     column_width = card_width + gap
     vertical_gap = 28
@@ -664,12 +787,29 @@ def render_bracket_html(fighters: Sequence[Fighter], rounds: Sequence[Sequence[M
     )
     third_place = ""
     if has_third_place and third_place_number is not None:
+        semi_round_index = len(rounds) - 2
+        semi_1_id = (
+            category_bout_id(category, semi_round_index, 0)
+            if category is not None
+            else ""
+        )
+        semi_2_id = (
+            category_bout_id(category, semi_round_index, 1)
+            if category is not None
+            else ""
+        )
+        semi_1_number = global_numbers.get(semi_1_id) if global_numbers else None
+        semi_2_number = global_numbers.get(semi_2_id) if global_numbers else None
         third_place = (
             '<section class="third-place"><h3>Petite finale, 3e place</h3>'
             f'<article class="match"><div class="match-heading">'
-            f"Combat {third_place_number} pour la médaille de bronze</div>"
-            '<div class="fighter pending">Perdant de la demi-finale 1</div>'
-            '<div class="fighter pending">Perdant de la demi-finale 2</div></article></section>'
+            f"COMBAT #{third_place_number} POUR LE BRONZE</div>"
+            f'<div class="fighter pending">'
+            f'{html.escape(f"Perdant Combat #{semi_1_number}" if semi_1_number else "Perdant demi-finale 1")}'
+            '</div>'
+            f'<div class="fighter pending">'
+            f'{html.escape(f"Perdant Combat #{semi_2_number}" if semi_2_number else "Perdant demi-finale 2")}'
+            '</div></article></section>'
         )
     direct_final_note = (
         '<p class="help">Finale directe : le vainqueur remporte l’or, le perdant l’argent.</p>'
@@ -687,6 +827,7 @@ def render_bracket_html(fighters: Sequence[Fighter], rounds: Sequence[Sequence[M
 def build_pdf(
     grouped: dict[Category, list[Fighter]],
     bracket_by_category: dict[Category, list[list[Match]]],
+    global_numbers: dict[str, int] | None = None,
 ) -> bytes:
     from reportlab.lib.colors import HexColor, white
     from reportlab.lib.pagesizes import A4, landscape
@@ -705,12 +846,24 @@ def build_pdf(
 
     for category, fighters in grouped.items():
         rounds = bracket_by_category[category]
-        numbers = combat_numbers(rounds)
+        numbers = (
+            global_combat_numbers(category, rounds, global_numbers)
+            if global_numbers
+            else combat_numbers(rounds)
+        )
         is_round_robin = len(fighters) == 3
         layout, final_index = bracket_layout(rounds) if rounds else ([], -1)
         single_left = bool(rounds and len(rounds[0]) <= 4)
         has_third_place = len(fighters) >= 4 and len(rounds) >= 2 and len(rounds[-2]) == 2
-        third_place_number = len(numbers) + 1 if has_third_place else None
+        if has_third_place:
+            bronze_id = f"{category_filename(category)}-B"
+            third_place_number = (
+                global_numbers.get(bronze_id)
+                if global_numbers and bronze_id in global_numbers
+                else len(numbers) + 1
+            )
+        else:
+            third_place_number = None
         total_width = (
             740
             if len(fighters) in (2, 3)
@@ -774,6 +927,11 @@ def build_pdf(
             match_width, match_height = 220, 68
             for index, (first, second) in enumerate(round_robin_matches(fighters), start=1):
                 x = 20 + (index - 1) * 240
+                pool_number = (
+                    global_numbers.get(f"{category_filename(category)}-P{index}")
+                    if global_numbers
+                    else index
+                )
                 pdf.setFillColor(white)
                 pdf.setStrokeColor(HexColor("#ddddda"))
                 pdf.roundRect(x, match_bottom, match_width, match_height, 6, fill=1, stroke=1)
@@ -782,7 +940,7 @@ def build_pdf(
                 pdf.rect(x, match_bottom + match_height - 21, match_width, 6, fill=1, stroke=0)
                 pdf.setFillColor(ink)
                 pdf.setFont("Helvetica-Bold", 9)
-                pdf.drawString(x + 10, match_bottom + match_height - 14, f"COMBAT {index}")
+                pdf.drawString(x + 10, match_bottom + match_height - 14, f"COMBAT #{pool_number}")
                 pdf.setFont("Helvetica", 8.5)
                 draw_pdf_fighter(
                     pdf, ImageReader, first, x + 10, match_bottom + 25, 16
@@ -893,7 +1051,12 @@ def build_pdf(
             )
             pdf.setFillColor(ink)
             pdf.setFont("Helvetica-Bold", 10)
-            pdf.drawString(card_x + 14, card_y + card_height_direct - 18, "COMBAT 1")
+            direct_number = (
+                global_numbers.get(f"{category_filename(category)}-F")
+                if global_numbers
+                else 1
+            )
+            pdf.drawString(card_x + 14, card_y + card_height_direct - 18, f"COMBAT #{direct_number}")
             pdf.setFont("Helvetica-Bold", 11)
             draw_pdf_fighter(
                 pdf, ImageReader, fighters[0], card_x + 16, card_y + 45, 18
@@ -1017,7 +1180,7 @@ def build_pdf(
             heading = (
                 "QUALIFIÉ D’OFFICE"
                 if match.is_bye
-                else f"COMBAT {match_number}"
+                else f"COMBAT #{match_number}"
             )
             pdf.drawString(x + 7, y + card_height - 12, heading)
             pdf.setStrokeColor(HexColor("#e8e8e4"))
@@ -1070,11 +1233,24 @@ def build_pdf(
             pdf.drawString(
                 bronze_x + 7,
                 bronze_y + bronze_height - 12,
-                f"COMBAT {third_place_number} POUR LE BRONZE",
+                f"COMBAT #{third_place_number} POUR LE BRONZE",
             )
             pdf.setFont("Helvetica", 8.5)
-            pdf.drawString(bronze_x + 7, bronze_y + 24, "Perdant de la demi-finale 1")
-            pdf.drawString(bronze_x + 7, bronze_y + 8, "Perdant de la demi-finale 2")
+            semi_round_index = len(rounds) - 2
+            semi_1_id = category_bout_id(category, semi_round_index, 0)
+            semi_2_id = category_bout_id(category, semi_round_index, 1)
+            semi_1_number = global_numbers.get(semi_1_id) if global_numbers else None
+            semi_2_number = global_numbers.get(semi_2_id) if global_numbers else None
+            pdf.drawString(
+                bronze_x + 7,
+                bronze_y + 24,
+                f"Perdant Combat #{semi_1_number}" if semi_1_number else "Perdant demi-finale 1",
+            )
+            pdf.drawString(
+                bronze_x + 7,
+                bronze_y + 8,
+                f"Perdant Combat #{semi_2_number}" if semi_2_number else "Perdant demi-finale 2",
+            )
 
         pdf.restoreState()
         pdf.showPage()
@@ -1083,7 +1259,11 @@ def build_pdf(
     return output.getvalue()
 
 
-def render_category(category: Category, fighters: list[Fighter]) -> None:
+def render_category(
+    category: Category,
+    fighters: list[Fighter],
+    global_numbers: dict[str, int] | None = None,
+) -> None:
     sex, age_band, weight, normalized_level = category
     level_text = "" if normalized_level == "unique" else f" · {fighters[0].level}"
     count_text = f"{len(fighters)} combattant{'s' if len(fighters) > 1 else ''}"
@@ -1096,12 +1276,13 @@ def render_category(category: Category, fighters: list[Fighter]) -> None:
             elif len(fighters) == 3:
                 st.caption("Poule Round Robin : les trois combattants s’affrontent chacun une fois.")
             st.markdown(
-                render_bracket_html(fighters, rounds),
+                render_bracket_html(fighters, rounds, category, global_numbers),
                 unsafe_allow_html=True,
             )
             category_pdf = build_pdf(
                 {category: fighters},
                 {category: rounds},
+                global_numbers,
             )
             st.download_button(
                 "Enregistrer cette catégorie en PDF",
@@ -1186,6 +1367,49 @@ def apply_styles() -> None:
         .fighter-avatar {
           flex:0 0 22px; width:22px; height:22px; border-radius:50%;
           object-fit:cover; background:#ecece8;
+        }
+        .schedule-table-wrap { width:100%; overflow-x:auto; }
+        .schedule-table {
+          width:100%; border-collapse:separate; border-spacing:0;
+          border:1px solid #deded9; border-radius:8px; overflow:hidden;
+          font-size:.78rem;
+        }
+        .schedule-table th {
+          background:#111111; color:#ffffff; text-align:left;
+          padding:9px 8px; font-size:.72rem; letter-spacing:.04em;
+        }
+        .schedule-table td {
+          padding:8px; border-top:1px solid #ecece8;
+          vertical-align:middle; background:#ffffff;
+          break-inside:avoid; page-break-inside:avoid;
+        }
+        .schedule-table tbody tr:nth-child(even) td { background:#f7f7f4; }
+        .schedule-number {
+          display:inline-flex; justify-content:center; align-items:center;
+          min-width:38px; height:26px; padding:0 7px; border-radius:5px;
+          background:#111111; color:#F5C518; font-weight:900;
+        }
+        .schedule-number.accent { background:#F5C518; color:#111111; }
+        .schedule-time { font-weight:800; white-space:nowrap; }
+        .schedule-category {
+          display:inline-block; max-width:100%; margin-right:6px;
+          padding:3px 6px; border-radius:4px; background:#ecece8;
+          font-size:.68rem; font-weight:800;
+        }
+        .schedule-phase { color:#686868; white-space:nowrap; }
+        .schedule-vs { text-align:center; color:#686868; font-weight:900; }
+        .schedule-fighter {
+          display:flex; align-items:center; gap:6px;
+          min-width:150px; font-weight:650;
+        }
+        .schedule-fighter .fighter-avatar {
+          flex-basis:24px; width:24px; height:24px;
+        }
+        .schedule-avatar {
+          display:inline-flex; flex:0 0 24px; width:24px; height:24px;
+          align-items:center; justify-content:center;
+          border-radius:50%; background:#E5E7EB; color:#686868;
+          font-size:.68rem; font-weight:900;
         }
         .fighter span {
           min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
@@ -1352,26 +1576,34 @@ def main() -> None:
         ]
         st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
 
-    st.subheader("Tableaux de compétition")
-    for category, category_fighters in grouped.items():
-        render_category(category, category_fighters)
-
-    st.subheader("Ordre de passage")
-    st.caption("Planning généré automatiquement sur 1 tatami.")
-    nb_tatamis = 1
     schedule_bouts = public_schedule_bouts(grouped, public_brackets)
-    if not schedule_bouts:
-        st.info("L’ordre de passage sera disponible dès qu’au moins deux combats seront publiés.")
-    else:
+    schedule_frame: pd.DataFrame | None = None
+    schedule_report: dict | None = None
+    global_numbers: dict[str, int] = {}
+    if schedule_bouts:
         try:
             schedule_frame, schedule_report = generate_schedule(
                 schedule_bouts,
-                nb_tatamis=int(nb_tatamis),
+                nb_tatamis=1,
                 seed=20261128,
             )
         except (ValueError, KeyError) as error:
             st.error(f"Impossible de générer l’ordre de passage : {error}")
         else:
+            global_numbers = {
+                bout_id: position + 1
+                for position, bout_id in enumerate(schedule_report["order"])
+            }
+
+    st.subheader("Tableaux de compétition")
+    for category, category_fighters in grouped.items():
+        render_category(category, category_fighters, global_numbers)
+
+    st.subheader("Ordre de passage")
+    st.caption("Planning généré automatiquement sur 1 tatami.")
+    if not schedule_bouts:
+        st.info("L’ordre de passage sera disponible dès qu’au moins deux combats seront publiés.")
+    elif schedule_frame is not None and schedule_report is not None:
             if schedule_report["critical_violations"] == 0:
                 st.success(
                     f"{len(schedule_frame)} combats programmés · "
@@ -1381,11 +1613,15 @@ def main() -> None:
             else:
                 st.warning("L’ordre de passage nécessite une vérification avant publication.")
 
-            st.dataframe(schedule_frame, hide_index=True, width="stretch")
+            display_frame = schedule_frame.drop(columns=["_bout_id"], errors="ignore")
+            st.markdown(
+                render_schedule_html(schedule_frame, fighters),
+                unsafe_allow_html=True,
+            )
             export_columns = st.columns(2)
             export_columns[0].download_button(
                 "Télécharger l’ordre en CSV",
-                data=schedule_frame.to_csv(index=False, encoding="utf-8-sig"),
+                data=display_frame.to_csv(index=False, encoding="utf-8-sig"),
                 file_name="TFT_Serie_No-GI_1_ordre_de_passage.csv",
                 mime="text/csv",
                 key="schedule-csv",
@@ -1394,6 +1630,7 @@ def main() -> None:
                 schedule_pdf = export_schedule_pdf_bytes(
                     schedule_frame,
                     schedule_report,
+                    {fighter.display_name: fighter for fighter in fighters},
                 )
             except ImportError:
                 st.caption("L’export PDF nécessite reportlab.")
@@ -1407,7 +1644,11 @@ def main() -> None:
                 )
 
     try:
-        pdf_bytes = build_pdf(grouped, st.session_state["tournament_brackets"])
+        pdf_bytes = build_pdf(
+            grouped,
+            st.session_state["tournament_brackets"],
+            global_numbers,
+        )
     except ImportError:
         st.warning("L’export PDF nécessite reportlab. Vous pouvez imprimer cette page avec Ctrl+P.")
     else:

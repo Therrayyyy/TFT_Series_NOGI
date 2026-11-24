@@ -68,14 +68,6 @@ def _phase_priority(phase: str) -> int:
 
 
 def _bout_priority(bout: BoutInput, bouts: Sequence[BoutInput]) -> int:
-    if bout.phase == "Finale":
-        has_bronze = any(
-            candidate.phase == "Petite Finale"
-            and candidate.categorie == bout.categorie
-            for candidate in bouts
-        )
-        if not has_bronze:
-            return 0
     return _phase_priority(bout.phase)
 
 
@@ -114,6 +106,15 @@ def generate_schedule(
             ]
             if not eligible:
                 raise ValueError("Les dépendances de l’arbre ne sont pas acycliques.")
+            minimum_phase = min(
+                _bout_priority(by_id[bout_id], bouts)
+                for bout_id in eligible
+            )
+            eligible = [
+                bout_id
+                for bout_id in eligible
+                if _bout_priority(by_id[bout_id], bouts) == minimum_phase
+            ]
 
             position = len(scheduled)
             time_group = _chronological_group(position, nb_tatamis)
@@ -299,7 +300,21 @@ def build_dataframe(
 
     rest_ok = report["rest_violations"] == 0
     frame["Repos min. respecté (Oui/Non)"] = "Oui" if rest_ok else "Non"
-    return frame.drop(columns=["_bout_id"]), report
+
+    def resolve_slot_reference(value: str) -> str:
+        for prefix in ("Vainqueur du combat ", "Perdant du combat "):
+            if value.startswith(prefix):
+                bout_id = value[len(prefix):]
+                global_number = position_by_id.get(bout_id)
+                if global_number is not None:
+                    label = "Vainqueur" if prefix.startswith("Vainqueur") else "Perdant"
+                    return f"{label} Combat #{global_number + 1}"
+        return value
+
+    frame["Combattant A"] = frame["Combattant A"].map(resolve_slot_reference)
+    frame["Combattant B"] = frame["Combattant B"].map(resolve_slot_reference)
+    frame["_bout_id"] = [order[position] for position in range(len(order))]
+    return frame, report
 
 
 def validate_schedule(
@@ -432,12 +447,24 @@ def export_schedule_pdf(frame: pd.DataFrame, output_path: Path, report: dict) ->
     doc.build(story)
 
 
-def export_schedule_pdf_bytes(frame: pd.DataFrame, report: dict) -> bytes:
+def export_schedule_pdf_bytes(
+    frame: pd.DataFrame,
+    report: dict,
+    fighter_by_name: dict[str, object] | None = None,
+) -> bytes:
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4, landscape
-    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import mm
-    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    from reportlab.lib.utils import ImageReader
+    from reportlab.platypus import (
+        Image,
+        Paragraph,
+        SimpleDocTemplate,
+        Spacer,
+        Table,
+        TableStyle,
+    )
 
     output = io.BytesIO()
     doc = SimpleDocTemplate(
@@ -450,30 +477,150 @@ def export_schedule_pdf_bytes(frame: pd.DataFrame, report: dict) -> bytes:
         title="TFT Série No-GI #1 - Ordre de passage",
     )
     styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        "ScheduleTitle",
+        parent=styles["Title"],
+        textColor=colors.white,
+        fontName="Helvetica-Bold",
+        fontSize=16,
+        leading=20,
+    )
+    kicker_style = ParagraphStyle(
+        "ScheduleKicker",
+        parent=styles["Normal"],
+        textColor=colors.HexColor("#F5C518"),
+        fontName="Helvetica-Bold",
+        fontSize=8,
+        leading=10,
+    )
+    subtitle_style = ParagraphStyle(
+        "ScheduleSubtitle",
+        parent=styles["Normal"],
+        textColor=colors.HexColor("#D6D6D2"),
+        fontSize=8,
+        leading=10,
+    )
+    cell_style = ParagraphStyle(
+        "ScheduleCell",
+        parent=styles["Normal"],
+        fontName="Helvetica",
+        fontSize=7,
+        leading=9,
+    )
+    header = Table(
+        [[
+            Paragraph("TFT SÉRIE NO-GI #1", kicker_style),
+            "",
+        ], [
+            Paragraph(
+                f"Ordre de passage officiel • {len(frame)} combats",
+                title_style,
+            ),
+            "",
+        ], [
+            Paragraph(
+                "Pesée : 13h00  |  Début des combats : 14h00  |  Toulouse (38 Av. de Lombez)",
+                subtitle_style,
+            ),
+            "",
+        ]],
+        colWidths=[260 * mm, 12 * mm],
+    )
+    header.setStyle(
+        TableStyle(
+            [
+                ("SPAN", (0, 0), (1, 0)),
+                ("SPAN", (0, 1), (1, 1)),
+                ("SPAN", (0, 2), (1, 2)),
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#111111")),
+                ("LEFTPADDING", (0, 0), (-1, -1), 8),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ]
+        )
+    )
     story = [
-        Paragraph("TFT Série No-GI #1 - Ordre de passage", styles["Title"]),
-        Spacer(1, 4 * mm),
-        Paragraph(
-            f"Planification : {len(frame)} combats · "
-            f"{'Valide' if report['valid'] else 'À corriger'}",
-            styles["Normal"],
-        ),
+        header,
         Spacer(1, 5 * mm),
     ]
-    data = [list(frame.columns)]
-    data.extend([str(value) for value in row] for row in frame.itertuples(index=False, name=None))
-    table = Table(data, repeatRows=1)
+
+    data = [["N°", "Heure", "Catégorie & Phase", "Combattant A", "VS", "Combattant B"]]
+    accent_rows: list[int] = []
+    for row in frame.itertuples(index=False, name=None):
+        row_dict = dict(zip(frame.columns, row))
+        number = row_dict["Ordre (#)"]
+        phase = str(row_dict["Phase"])
+        accent = phase in ("Petite Finale", "Finale")
+        if accent:
+            accent_rows.append(len(data))
+
+        def fighter_cell(name: object) -> object:
+            text = str(name)
+            fighter = fighter_by_name.get(text) if fighter_by_name else None
+            photo_data = getattr(fighter, "photo_data", None)
+            if photo_data:
+                photo = Image(ImageReader(io.BytesIO(photo_data)), width=7 * mm, height=7 * mm)
+                return Table([[photo, Paragraph(text, cell_style)]], colWidths=[8 * mm, 49 * mm])
+            parts = text.strip().split()
+            initials = "".join(part[0] for part in parts[:2]).upper() if parts else "?"
+            return Table(
+                [[
+                    Paragraph(initials, ParagraphStyle(
+                        "Initials",
+                        parent=cell_style,
+                        alignment=1,
+                        textColor=colors.HexColor("#686868"),
+                    )),
+                    Paragraph(text, cell_style),
+                ]],
+                colWidths=[8 * mm, 49 * mm],
+            )
+
+        number_cell = Paragraph(
+            f"<b>#{number}</b>",
+            ParagraphStyle(
+                "Number",
+                parent=cell_style,
+                alignment=1,
+                textColor=colors.HexColor("#F5C518") if not accent else colors.HexColor("#111111"),
+                fontName="Helvetica-Bold",
+            ),
+        )
+        category_phase = (
+            f"<b>{row_dict['Catégorie']}</b><br/>"
+            f"<font color='#686868'>{phase}</font>"
+        )
+        data.append([
+            number_cell,
+            str(row_dict["Heure estimée"]),
+            Paragraph(category_phase, cell_style),
+            fighter_cell(row_dict["Combattant A"]),
+            "VS",
+            fighter_cell(row_dict["Combattant B"]),
+        ])
+
+    table = Table(
+        data,
+        repeatRows=1,
+        colWidths=[12 * mm, 16 * mm, 66 * mm, 65 * mm, 10 * mm, 65 * mm],
+    )
     table.setStyle(
         TableStyle(
             [
                 ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#111111")),
                 ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
                 ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-                ("FONTNAME", (0, 1), (-1, -1), "Helvetica"),
                 ("FONTSIZE", (0, 0), (-1, -1), 7),
                 ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#ddddda")),
                 ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f4f4f1")]),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("ALIGN", (0, 1), (1, -1), "CENTER"),
+                ("ALIGN", (4, 1), (4, -1), "CENTER"),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+                ("BACKGROUND", (0, 1), (0, -1), colors.HexColor("#111111")),
+                ("TEXTCOLOR", (0, 1), (0, -1), colors.HexColor("#F5C518")),
             ]
         )
     )

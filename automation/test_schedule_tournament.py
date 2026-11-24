@@ -75,6 +75,15 @@ class TournamentScheduleTests(unittest.TestCase):
         self.assertEqual(len(frame), len(bouts))
         self.assertEqual(report["missing_bouts"], [])
         self.assertEqual(report["duplicate_bouts"], 0)
+        phase_rank = {
+            "Poule": 0,
+            "Quart": 0,
+            "Demi": 1,
+            "Petite Finale": 2,
+            "Finale": 3,
+        }
+        ranks = [phase_rank[str(phase)] for phase in frame["Phase"]]
+        self.assertEqual(ranks, sorted(ranks))
 
 
 if __name__ == "__main__":
