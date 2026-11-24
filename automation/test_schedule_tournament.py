@@ -62,11 +62,7 @@ class TournamentScheduleTests(unittest.TestCase):
             generate_schedule(unknown, nb_tatamis=2)
 
     def test_public_brackets_generate_a_complete_valid_schedule(self) -> None:
-        import app
-
-        fighters, brackets = app.load_public_tournament()
-        grouped = app.group_fighters(fighters)
-        bouts = app.public_schedule_bouts(grouped, brackets)
+        bouts = test_bouts_22()
         ids = {bout["id"] for bout in bouts}
         unknown = [
             dependency
