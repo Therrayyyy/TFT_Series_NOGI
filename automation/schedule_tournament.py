@@ -544,7 +544,15 @@ def export_schedule_pdf_bytes(
         Spacer(1, 5 * mm),
     ]
 
-    data = [["N°", "Heure", "Catégorie & Phase", "Combattant A", "VS", "Combattant B"]]
+    data = [[
+        "N°",
+        "Heure",
+        "Catégorie & Phase",
+        "Combattant A",
+        "VS",
+        "Combattant B",
+        "Résultat",
+    ]]
     accent_rows: list[int] = []
     for row in frame.itertuples(index=False, name=None):
         row_dict = dict(zip(frame.columns, row))
@@ -597,12 +605,13 @@ def export_schedule_pdf_bytes(
             fighter_cell(row_dict["Combattant A"]),
             "VS",
             fighter_cell(row_dict["Combattant B"]),
+            "",
         ])
 
     table = Table(
         data,
         repeatRows=1,
-        colWidths=[12 * mm, 16 * mm, 66 * mm, 65 * mm, 10 * mm, 65 * mm],
+        colWidths=[12 * mm, 16 * mm, 66 * mm, 65 * mm, 10 * mm, 65 * mm, 15 * mm],
     )
     table.setStyle(
         TableStyle(
@@ -616,6 +625,9 @@ def export_schedule_pdf_bytes(
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                 ("ALIGN", (0, 1), (1, -1), "CENTER"),
                 ("ALIGN", (4, 1), (4, -1), "CENTER"),
+                ("ALIGN", (6, 1), (6, -1), "CENTER"),
+                ("FONTNAME", (6, 1), (6, -1), "Helvetica-Bold"),
+                ("FONTSIZE", (6, 1), (6, -1), 9),
                 ("TOPPADDING", (0, 0), (-1, -1), 5),
                 ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
                 ("BACKGROUND", (0, 1), (0, -1), colors.HexColor("#111111")),
