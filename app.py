@@ -1568,8 +1568,6 @@ def main() -> None:
 
     grouped = group_fighters(fighters)
     st.session_state["tournament_brackets"] = public_brackets
-    st.caption("Consultation publique : les tableaux sont publiés par l’organisateur.")
-    st.success(f"{len(fighters)} combattant(s) publié(s), réparti(s) dans {len(grouped)} catégorie(s).")
     metric_columns = st.columns(3)
     metric_columns[0].metric("Combattants", len(fighters))
     metric_columns[1].metric("Catégories", len(grouped))
@@ -1621,26 +1619,27 @@ def main() -> None:
             if schedule_report["critical_violations"] != 0:
                 st.warning("L’ordre de passage nécessite une vérification avant publication.")
 
-            st.markdown(
-                render_schedule_html(schedule_frame, fighters),
-                unsafe_allow_html=True,
-            )
-            try:
-                schedule_pdf = export_schedule_pdf_bytes(
-                    schedule_frame,
-                    schedule_report,
-                    {fighter.display_name: fighter for fighter in fighters},
+            with st.expander("Afficher l’ordre de passage", expanded=False):
+                st.markdown(
+                    render_schedule_html(schedule_frame, fighters),
+                    unsafe_allow_html=True,
                 )
-            except ImportError:
-                st.caption("L’export PDF nécessite reportlab.")
-            else:
-                st.download_button(
-                    "Télécharger l’ordre en PDF",
-                    data=schedule_pdf,
-                    file_name="TFT_Serie_No-GI_1_ordre_de_passage.pdf",
-                    mime="application/pdf",
-                    key="schedule-pdf",
-                )
+                try:
+                    schedule_pdf = export_schedule_pdf_bytes(
+                        schedule_frame,
+                        schedule_report,
+                        {fighter.display_name: fighter for fighter in fighters},
+                    )
+                except ImportError:
+                    st.caption("L’export PDF nécessite reportlab.")
+                else:
+                    st.download_button(
+                        "Télécharger l’ordre en PDF",
+                        data=schedule_pdf,
+                        file_name="TFT_Serie_No-GI_1_ordre_de_passage.pdf",
+                        mime="application/pdf",
+                        key="schedule-pdf",
+                    )
 
     try:
         pdf_bytes = build_pdf(
@@ -1658,8 +1657,5 @@ def main() -> None:
             mime="application/pdf",
             type="primary",
         )
-    st.caption("Pour imprimer directement, utilisez Ctrl+P et choisissez l’imprimante ou l’enregistrement PDF.")
-
-
 if __name__ == "__main__":
     main()
