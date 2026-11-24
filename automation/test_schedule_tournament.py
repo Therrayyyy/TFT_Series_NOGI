@@ -1,12 +1,16 @@
 import tempfile
 import unittest
 from pathlib import Path
+from io import BytesIO
+from types import SimpleNamespace
 
 import pandas as pd
+from PIL import Image
 
 from schedule_tournament import (
     export_schedule_csv,
     export_schedule_pdf,
+    export_schedule_pdf_bytes,
     generate_schedule,
     test_bouts_22,
     validate_schedule,
@@ -43,6 +47,18 @@ class TournamentScheduleTests(unittest.TestCase):
             self.assertGreater(csv_path.stat().st_size, 100)
             self.assertTrue(pdf_path.exists())
             self.assertGreater(pdf_path.stat().st_size, 100)
+
+    def test_pdf_export_accepts_fighter_photo_bytes(self) -> None:
+        frame, report = generate_schedule(test_bouts_22(), nb_tatamis=1, seed=42)
+        photo = BytesIO()
+        Image.new("RGB", (16, 16), color="gold").save(photo, format="JPEG")
+        first_name = str(frame.iloc[0]["Combattant A"])
+        pdf = export_schedule_pdf_bytes(
+            frame,
+            report,
+            {first_name: SimpleNamespace(photo_data=photo.getvalue())},
+        )
+        self.assertTrue(pdf.startswith(b"%PDF-"))
 
     def test_duplicate_or_unknown_dependencies_are_rejected(self) -> None:
         bouts = test_bouts_22()

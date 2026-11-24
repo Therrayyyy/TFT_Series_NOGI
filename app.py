@@ -1615,31 +1615,15 @@ def main() -> None:
         render_category(category, category_fighters, global_numbers)
 
     st.subheader("Ordre de passage")
-    st.caption("Planning généré automatiquement sur 1 tatami.")
     if not schedule_bouts:
         st.info("L’ordre de passage sera disponible dès qu’au moins deux combats seront publiés.")
     elif schedule_frame is not None and schedule_report is not None:
-            if schedule_report["critical_violations"] == 0:
-                st.success(
-                    f"{len(schedule_frame)} combats programmés · "
-                    f"{schedule_report['tatami_load_difference']} combat(s) d’écart maximum "
-                    "entre tatamis."
-                )
-            else:
+            if schedule_report["critical_violations"] != 0:
                 st.warning("L’ordre de passage nécessite une vérification avant publication.")
 
-            display_frame = schedule_frame.drop(columns=["_bout_id"], errors="ignore")
             st.markdown(
                 render_schedule_html(schedule_frame, fighters),
                 unsafe_allow_html=True,
-            )
-            export_columns = st.columns(2)
-            export_columns[0].download_button(
-                "Télécharger l’ordre en CSV",
-                data=display_frame.to_csv(index=False, encoding="utf-8-sig"),
-                file_name="TFT_Serie_No-GI_1_ordre_de_passage.csv",
-                mime="text/csv",
-                key="schedule-csv",
             )
             try:
                 schedule_pdf = export_schedule_pdf_bytes(
@@ -1650,7 +1634,7 @@ def main() -> None:
             except ImportError:
                 st.caption("L’export PDF nécessite reportlab.")
             else:
-                export_columns[1].download_button(
+                st.download_button(
                     "Télécharger l’ordre en PDF",
                     data=schedule_pdf,
                     file_name="TFT_Serie_No-GI_1_ordre_de_passage.pdf",

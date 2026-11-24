@@ -456,7 +456,6 @@ def export_schedule_pdf_bytes(
     from reportlab.lib.pagesizes import A4, landscape
     from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
     from reportlab.lib.units import mm
-    from reportlab.lib.utils import ImageReader
     from reportlab.platypus import (
         Image,
         Paragraph,
@@ -560,7 +559,7 @@ def export_schedule_pdf_bytes(
             fighter = fighter_by_name.get(text) if fighter_by_name else None
             photo_data = getattr(fighter, "photo_data", None)
             if photo_data:
-                photo = Image(ImageReader(io.BytesIO(photo_data)), width=7 * mm, height=7 * mm)
+                photo = Image(io.BytesIO(photo_data), width=7 * mm, height=7 * mm)
                 return Table([[photo, Paragraph(text, cell_style)]], colWidths=[8 * mm, 49 * mm])
             parts = text.strip().split()
             initials = "".join(part[0] for part in parts[:2]).upper() if parts else "?"
