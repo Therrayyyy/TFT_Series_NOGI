@@ -13,6 +13,11 @@ from typing import Any, Sequence
 import pandas as pd
 import streamlit as st
 
+from automation.schedule_tournament import (
+    export_schedule_pdf_bytes,
+    generate_schedule,
+)
+
 
 APP_DIR = Path(__file__).resolve().parent
 LOGO_PATH = APP_DIR / "logo_club.png"
@@ -411,6 +416,122 @@ def render_round_robin_html(fighters: Sequence[Fighter]) -> str:
         '<p class="help">À compléter manuellement : classer d’abord par victoires, puis par soumissions.</p>'
         "</section>"
     )
+
+
+def public_schedule_bouts(
+    grouped: dict[Category, list[Fighter]],
+    bracket_by_category: dict[Category, list[list[Match]]],
+) -> list[dict]:
+    bouts: list[dict] = []
+
+    def add_bout(
+        bout_id: str,
+        category_name: str,
+        phase: str,
+        first: str,
+        second: str,
+        dependencies: Sequence[str] = (),
+    ) -> None:
+        bouts.append(
+            {
+                "id": bout_id,
+                "categorie": category_name,
+                "phase": phase,
+                "combattant_1": first,
+                "combattant_2": second,
+                "dependances": list(dependencies),
+            }
+        )
+
+    for category, fighters in grouped.items():
+        sex, age_band, weight, level = category
+        level_text = "" if level == "unique" else f" | {fighters[0].level}"
+        category_name = (
+            f"{sex} | {CATEGORY_LABELS[age_band]} | {display_weight(category)}"
+            f"{level_text}"
+        )
+
+        if len(fighters) == 3:
+            for index, (first, second) in enumerate(
+                round_robin_matches(fighters),
+                start=1,
+            ):
+                add_bout(
+                    f"{category_filename(category)}-P{index}",
+                    category_name,
+                    "Poule",
+                    first.display_name,
+                    second.display_name,
+                )
+            continue
+
+        if len(fighters) == 2:
+            add_bout(
+                f"{category_filename(category)}-F",
+                category_name,
+                "Finale",
+                fighters[0].display_name,
+                fighters[1].display_name,
+            )
+            continue
+
+        if len(fighters) == 1:
+            continue
+
+        rounds = bracket_by_category[category]
+        bout_ids: dict[tuple[int, int], str] = {}
+
+        for round_index, round_matches in enumerate(rounds):
+            if len(round_matches) == 1:
+                phase = "Finale"
+            elif len(round_matches) == 2:
+                phase = "Demi"
+            elif len(round_matches) == 4:
+                phase = "Quart"
+            else:
+                phase = "Tour"
+
+            for match in round_matches:
+                if match.is_bye:
+                    continue
+                bout_id = f"{category_filename(category)}-{round_index + 1}-{match.index + 1}"
+                bout_ids[(round_index, match.index)] = bout_id
+                if match.first is None or match.second is None:
+                    continue
+
+                dependencies: list[str] = []
+                if round_index > 0:
+                    for source_index in (match.index * 2, match.index * 2 + 1):
+                        source_id = bout_ids.get((round_index - 1, source_index))
+                        if source_id is not None:
+                            dependencies.append(source_id)
+
+                add_bout(
+                    bout_id,
+                    category_name,
+                    phase,
+                    match.first.display_name,
+                    match.second.display_name,
+                    dependencies,
+                )
+
+        has_third_place = len(fighters) >= 4 and len(rounds) >= 2 and len(rounds[-2]) == 2
+        if has_third_place:
+            semi_ids = [
+                bout_ids[(len(rounds) - 2, match.index)]
+                for match in rounds[-2]
+                if (len(rounds) - 2, match.index) in bout_ids
+            ]
+            add_bout(
+                f"{category_filename(category)}-B",
+                category_name,
+                "Petite Finale",
+                "Perdant de la demi-finale 1",
+                "Perdant de la demi-finale 2",
+                semi_ids,
+            )
+
+    return bouts
 
 
 def render_bracket_html(fighters: Sequence[Fighter], rounds: Sequence[Sequence[Match]]) -> str:
@@ -1222,6 +1343,60 @@ def main() -> None:
     st.subheader("Tableaux de compétition")
     for category, category_fighters in grouped.items():
         render_category(category, category_fighters)
+
+    st.subheader("Ordre de passage")
+    nb_tatamis = st.radio(
+        "Nombre de tatamis",
+        options=(1, 2),
+        index=1,
+        horizontal=True,
+    )
+    schedule_bouts = public_schedule_bouts(grouped, public_brackets)
+    if not schedule_bouts:
+        st.info("L’ordre de passage sera disponible dès qu’au moins deux combats seront publiés.")
+    else:
+        try:
+            schedule_frame, schedule_report = generate_schedule(
+                schedule_bouts,
+                nb_tatamis=int(nb_tatamis),
+                seed=20261128,
+            )
+        except (ValueError, KeyError) as error:
+            st.error(f"Impossible de générer l’ordre de passage : {error}")
+        else:
+            if schedule_report["critical_violations"] == 0:
+                st.success(
+                    f"{len(schedule_frame)} combats programmés · "
+                    f"{schedule_report['tatami_load_difference']} combat(s) d’écart maximum "
+                    "entre tatamis."
+                )
+            else:
+                st.warning("L’ordre de passage nécessite une vérification avant publication.")
+
+            st.dataframe(schedule_frame, hide_index=True, width="stretch")
+            export_columns = st.columns(2)
+            export_columns[0].download_button(
+                "Télécharger l’ordre en CSV",
+                data=schedule_frame.to_csv(index=False, encoding="utf-8-sig"),
+                file_name="TFT_Serie_No-GI_1_ordre_de_passage.csv",
+                mime="text/csv",
+                key="schedule-csv",
+            )
+            try:
+                schedule_pdf = export_schedule_pdf_bytes(
+                    schedule_frame,
+                    schedule_report,
+                )
+            except ImportError:
+                st.caption("L’export PDF nécessite reportlab.")
+            else:
+                export_columns[1].download_button(
+                    "Télécharger l’ordre en PDF",
+                    data=schedule_pdf,
+                    file_name="TFT_Serie_No-GI_1_ordre_de_passage.pdf",
+                    mime="application/pdf",
+                    key="schedule-pdf",
+                )
 
     try:
         pdf_bytes = build_pdf(grouped, st.session_state["tournament_brackets"])

@@ -6,3 +6,7 @@ __pycache__/
 *.xls
 *.csv
 *.tsv
+absolute_open.pdf
+absolute_open_names.txt
+schedule_tournament.pdf
+schedule_tournament.csv
