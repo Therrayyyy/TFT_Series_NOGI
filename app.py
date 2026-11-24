@@ -660,6 +660,21 @@ def render_bracket_html(
 ) -> str:
     if len(fighters) == 3:
         return render_round_robin_html(fighters, category, global_numbers)
+    if len(fighters) == 2:
+        direct_number = (
+            global_numbers.get(f"{category_filename(category)}-F")
+            if category is not None and global_numbers
+            else 1
+        )
+        return (
+            '<p class="help">Finale directe : le vainqueur remporte l’or, le perdant l’argent.</p>'
+            '<div class="bracket-scroll"><div class="bracket-canvas" style="width:480px;height:140px">'
+            '<article class="match" style="position:absolute;left:145px;top:34px;width:190px;height:88px">'
+            f'<div class="match-heading">COMBAT #{direct_number}</div>'
+            f'<div class="fighter">{fighter_photo_html(fighters[0])}<span>{html.escape(fighters[0].display_name)}</span></div>'
+            f'<div class="fighter">{fighter_photo_html(fighters[1])}<span>{html.escape(fighters[1].display_name)}</span></div>'
+            '</article></div></div>'
+        )
     if len(fighters) == 1:
         return (
             '<div class="solo-card"><strong>Un seul combattant inscrit</strong>'
