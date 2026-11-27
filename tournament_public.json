@@ -195,15 +195,6 @@
       ],
       "fighters": [
         {
-          "last_name": "Verrecchia",
-          "first_name": "Anthony",
-          "sex": "Homme",
-          "age_band": "M3",
-          "weight": "-68",
-          "level": "Intermédiaire ( +1,5 ans & -4 ans)",
-          "photo": "fighter_photos/007.jpg"
-        },
-        {
           "last_name": "Barnier",
           "first_name": "Gaspard",
           "sex": "Homme",
@@ -226,63 +217,10 @@
           "age_band": "M3",
           "weight": "-68",
           "level": "Intermédiaire ( +1,5 ans & -4 ans)",
-          "photo": "fighter_photos/010.jpg"
+          "photo": "fighter_photos/009.jpg"
         }
       ],
-      "rounds": [
-        [
-          {
-            "index": 0,
-            "first": {
-              "last_name": "Barnier",
-              "first_name": "Gaspard",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-68",
-              "level": "Intermédiaire ( +1,5 ans & -4 ans)"
-            },
-            "second": {
-              "last_name": "Exilie",
-              "first_name": "Baptiste",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-68",
-              "level": "Intermédiaire ( +1,5 ans & -4 ans)",
-              "photo": "fighter_photos/010.jpg"
-            },
-            "is_bye": false
-          },
-          {
-            "index": 1,
-            "first": {
-              "last_name": "Simonet",
-              "first_name": "Benjamin",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-68",
-              "level": "Intermédiaire ( +1,5 ans & -4 ans)"
-            },
-            "second": {
-              "last_name": "Verrecchia",
-              "first_name": "Anthony",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-68",
-              "level": "Intermédiaire ( +1,5 ans & -4 ans)",
-              "photo": "fighter_photos/007.jpg"
-            },
-            "is_bye": false
-          }
-        ],
-        [
-          {
-            "index": 0,
-            "first": null,
-            "second": null,
-            "is_bye": false
-          }
-        ]
-      ]
+      "rounds": []
     },
     {
       "category": [
@@ -307,7 +245,7 @@
           "age_band": "M3",
           "weight": "-75",
           "level": "Débutant ( -1,5 ans)",
-          "photo": "fighter_photos/012.jpg"
+          "photo": "fighter_photos/011.jpg"
         },
         {
           "last_name": "Lamy",
@@ -324,14 +262,6 @@
           "age_band": "M3",
           "weight": "-75",
           "level": "Débutant ( -1,5 ans)"
-        },
-        {
-          "last_name": "LOEZ",
-          "first_name": "hugo",
-          "sex": "Homme",
-          "age_band": "M3",
-          "weight": "-75",
-          "level": "Débutant ( -1,5 ans)"
         }
       ],
       "rounds": [
@@ -339,6 +269,15 @@
           {
             "index": 0,
             "first": {
+              "last_name": "Andalo",
+              "first_name": "Colin",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-75",
+              "level": "Débutant ( -1,5 ans)",
+              "photo": "fighter_photos/011.jpg"
+            },
+            "second": {
               "last_name": "ZERARGA",
               "first_name": "Macéo",
               "sex": "Homme",
@@ -346,47 +285,11 @@
               "weight": "-75",
               "level": "Débutant ( -1,5 ans)"
             },
-            "second": null,
-            "is_bye": true
+            "is_bye": false
           },
           {
             "index": 1,
             "first": {
-              "last_name": "LOEZ",
-              "first_name": "hugo",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-75",
-              "level": "Débutant ( -1,5 ans)"
-            },
-            "second": null,
-            "is_bye": true
-          },
-          {
-            "index": 2,
-            "first": {
-              "last_name": "Andalo",
-              "first_name": "Colin",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-75",
-              "level": "Débutant ( -1,5 ans)",
-              "photo": "fighter_photos/012.jpg"
-            },
-            "second": null,
-            "is_bye": true
-          },
-          {
-            "index": 3,
-            "first": {
-              "last_name": "Lamy",
-              "first_name": "Magnus",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-75",
-              "level": "Débutant ( -1,5 ans)"
-            },
-            "second": {
               "last_name": "Le Goff",
               "first_name": "Lucas",
               "sex": "Homme",
@@ -394,42 +297,14 @@
               "weight": "-75",
               "level": "Débutant ( -1,5 ans)"
             },
-            "is_bye": false
-          }
-        ],
-        [
-          {
-            "index": 0,
-            "first": {
-              "last_name": "ZERARGA",
-              "first_name": "Macéo",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-75",
-              "level": "Débutant ( -1,5 ans)"
-            },
             "second": {
-              "last_name": "LOEZ",
-              "first_name": "hugo",
+              "last_name": "Lamy",
+              "first_name": "Magnus",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "-75",
               "level": "Débutant ( -1,5 ans)"
             },
-            "is_bye": false
-          },
-          {
-            "index": 1,
-            "first": {
-              "last_name": "Andalo",
-              "first_name": "Colin",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-75",
-              "level": "Débutant ( -1,5 ans)",
-              "photo": "fighter_photos/012.jpg"
-            },
-            "second": null,
             "is_bye": false
           }
         ],
@@ -438,6 +313,58 @@
             "index": 0,
             "first": null,
             "second": null,
+            "is_bye": false
+          }
+        ]
+      ]
+    },
+    {
+      "category": [
+        "Homme",
+        "M3",
+        "-75",
+        "intermediaire ( +1,5 ans & -4 ans)"
+      ],
+      "fighters": [
+        {
+          "last_name": "Verrecchia",
+          "first_name": "Anthony",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-75",
+          "level": "Intermédiaire ( +1,5 ans & -4 ans)",
+          "photo": "fighter_photos/014.jpg"
+        },
+        {
+          "last_name": "LOEZ",
+          "first_name": "hugo",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-75",
+          "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+        }
+      ],
+      "rounds": [
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "Verrecchia",
+              "first_name": "Anthony",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-75",
+              "level": "Intermédiaire ( +1,5 ans & -4 ans)",
+              "photo": "fighter_photos/014.jpg"
+            },
+            "second": {
+              "last_name": "LOEZ",
+              "first_name": "hugo",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-75",
+              "level": "Intermédiaire ( +1,5 ans & -4 ans)"
+            },
             "is_bye": false
           }
         ]
