@@ -265,7 +265,7 @@ def display_weight(category: Category) -> str:
         and weight == "-68"
         and level == "intermediaire ( +1,5 ans & -4 ans)"
     ):
-        return "Open -68/-75 kg"
+        return "-68 kg"
     return f"{weight} kg"
 
 
@@ -445,9 +445,10 @@ def render_round_robin_html(
         '<section class="round-robin"><h3>Poule unique, chaque combattant rencontre les deux autres</h3>'
         f'<div class="round-robin-matches">{matches}</div>'
         '<table class="standings"><thead><tr><th>Classement</th><th>Combattant</th>'
-        '<th>Victoires</th><th>Soumissions</th></tr></thead>'
+        '<th>Victoires</th><th>Temps</th></tr></thead>'
         f"<tbody>{standings}</tbody></table>"
-        '<p class="help">À compléter manuellement : classer d’abord par victoires, puis par soumissions.</p>'
+        '<p class="help">Format submission only : chaque victoire compte comme une soumission. '
+        'En cas d’égalité, départager par le temps total de soumission le plus court.</p>'
         "</section>"
     )
 
@@ -978,7 +979,7 @@ def build_pdf(
             table_width = total_width - 40
             table_header_y = table_top - 28
             column_widths = (42, 265, 130, 140, table_width - 577)
-            headings = ("Rang", "Combattant", "Victoires", "Soumissions", "Notes")
+            headings = ("Rang", "Combattant", "Victoires", "Temps", "Notes")
             pdf.setFillColor(HexColor("#f2f2ef"))
             pdf.setStrokeColor(HexColor("#ddddda"))
             pdf.rect(table_x, table_header_y, table_width, 24, fill=1, stroke=1)
@@ -1021,7 +1022,8 @@ def build_pdf(
             pdf.drawCentredString(
                 total_width / 2,
                 44,
-                "Classer par victoires, puis par soumissions.",
+                "Submission only : chaque victoire compte comme une soumission. "
+                "Départager par le temps total de soumission le plus court.",
             )
             pdf.restoreState()
             pdf.showPage()
