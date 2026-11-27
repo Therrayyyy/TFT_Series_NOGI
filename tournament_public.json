@@ -324,12 +324,46 @@
           "age_band": "M3",
           "weight": "-75",
           "level": "Débutant ( -1,5 ans)"
+        },
+        {
+          "last_name": "LOEZ",
+          "first_name": "hugo",
+          "sex": "Homme",
+          "age_band": "M3",
+          "weight": "-75",
+          "level": "Débutant ( -1,5 ans)"
         }
       ],
       "rounds": [
         [
           {
             "index": 0,
+            "first": {
+              "last_name": "ZERARGA",
+              "first_name": "Macéo",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-75",
+              "level": "Débutant ( -1,5 ans)"
+            },
+            "second": null,
+            "is_bye": true
+          },
+          {
+            "index": 1,
+            "first": {
+              "last_name": "LOEZ",
+              "first_name": "hugo",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-75",
+              "level": "Débutant ( -1,5 ans)"
+            },
+            "second": null,
+            "is_bye": true
+          },
+          {
+            "index": 2,
             "first": {
               "last_name": "Andalo",
               "first_name": "Colin",
@@ -339,9 +373,44 @@
               "level": "Débutant ( -1,5 ans)",
               "photo": "fighter_photos/012.jpg"
             },
-            "second": {
+            "second": null,
+            "is_bye": true
+          },
+          {
+            "index": 3,
+            "first": {
               "last_name": "Lamy",
               "first_name": "Magnus",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-75",
+              "level": "Débutant ( -1,5 ans)"
+            },
+            "second": {
+              "last_name": "Le Goff",
+              "first_name": "Lucas",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-75",
+              "level": "Débutant ( -1,5 ans)"
+            },
+            "is_bye": false
+          }
+        ],
+        [
+          {
+            "index": 0,
+            "first": {
+              "last_name": "ZERARGA",
+              "first_name": "Macéo",
+              "sex": "Homme",
+              "age_band": "M3",
+              "weight": "-75",
+              "level": "Débutant ( -1,5 ans)"
+            },
+            "second": {
+              "last_name": "LOEZ",
+              "first_name": "hugo",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "-75",
@@ -352,21 +421,15 @@
           {
             "index": 1,
             "first": {
-              "last_name": "Le Goff",
-              "first_name": "Lucas",
+              "last_name": "Andalo",
+              "first_name": "Colin",
               "sex": "Homme",
               "age_band": "M3",
               "weight": "-75",
-              "level": "Débutant ( -1,5 ans)"
+              "level": "Débutant ( -1,5 ans)",
+              "photo": "fighter_photos/012.jpg"
             },
-            "second": {
-              "last_name": "ZERARGA",
-              "first_name": "Macéo",
-              "sex": "Homme",
-              "age_band": "M3",
-              "weight": "-75",
-              "level": "Débutant ( -1,5 ans)"
-            },
+            "second": null,
             "is_bye": false
           }
         ],
@@ -395,7 +458,7 @@
           "age_band": "M3",
           "weight": "-85",
           "level": "Débutant ( -1,5 ans)",
-          "photo": "fighter_photos/015.jpg"
+          "photo": "fighter_photos/016.jpg"
         },
         {
           "last_name": "De Yzaguirre",
@@ -404,7 +467,7 @@
           "age_band": "M3",
           "weight": "-85",
           "level": "Débutant ( -1,5 ans)",
-          "photo": "fighter_photos/016.jpg"
+          "photo": "fighter_photos/017.jpg"
         },
         {
           "last_name": "Soler",
@@ -432,7 +495,7 @@
           "age_band": "M3",
           "weight": "+85",
           "level": "Intermédiaire ( +1,5 ans & -4 ans)",
-          "photo": "fighter_photos/018.jpg"
+          "photo": "fighter_photos/019.jpg"
         },
         {
           "last_name": "Panepinto",
